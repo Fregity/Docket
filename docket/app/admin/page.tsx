@@ -33,8 +33,8 @@ export default async function AdminPage() {
 
   // 3. Fetch the typed data inside the function block where supabase is available
   const { data } = await supabase
-    .rpc<"admin_counts", AdminStats>("admin_counts")
-    .maybeSingle();
+    .rpc("admin_counts")
+    .maybeSingle() as { data: AdminStats | null };
 
   const stats = [
     { label: "Total users", value: data?.total_users ?? 0 },
