@@ -43,8 +43,3 @@ export async function joinClassByCode(code: string) {
   revalidatePath("/classes");
   redirect(`/classes/${joinedClass.id}`);
 }
-  }
-
-  revalidatePath("/dashboard");
-  redirect(`/classes/${data.id}`);
-}
