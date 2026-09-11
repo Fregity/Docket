@@ -2,6 +2,12 @@ import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
+interface AdminStats {
+  total_users: number;
+  total_classes: number;
+  total_assignments: number;
+}
+
 export default async function AdminPage() {
   const supabase = await createClient();
   const {
