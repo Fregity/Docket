@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { unstable_rethrow } from "next/navigation";
+// 1. Change the import to use isRedirectError
+import { isRedirectError } from "next/navigation"; 
 import { joinClassByCode } from "@/lib/actions/classes";
 
 export function JoinButton({ code }: { code: string }) {
@@ -14,9 +15,11 @@ export function JoinButton({ code }: { code: string }) {
       try {
         await joinClassByCode(code);
       } catch (err) {
-        // redirect() inside the action throws internally on success — let
-        // that signal propagate so the navigation actually happens.
-        unstable_rethrow(err);
+        // 2. Use isRedirectError to let the redirect signal propagate
+        if (isRedirectError(err)) {
+          throw err;
+        }
+        
         setError(err instanceof Error ? err.message : "Something went wrong.");
       }
     });
