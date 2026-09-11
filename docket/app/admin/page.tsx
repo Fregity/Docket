@@ -2,23 +2,19 @@ import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
-// 1. Explicitly type the RPC response using your AdminStats interface
-const { data } = await supabase
-  .rpc<"admin_counts", AdminStats>("admin_counts")
-  .maybeSingle();
-
-const stats = [
-  { label: "Total users", value: data?.total_users ?? 0 },
-  { label: "Total classes", value: data?.total_classes ?? 0 },
-  { label: "Total assignments", value: data?.total_assignments ?? 0 },
-];
-
+// Define your interface so TypeScript knows what properties 'data' has
+interface AdminStats {
+  total_users: number;
+  total_classes: number;
+  total_assignments: number;
+}
 
 export default async function AdminPage() {
+  // 1. Initialize the Supabase client safely inside the server component
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+
+  // 2. Handle authentication and authorization
+  const { data: { user } } = await supabase.auth.getUser();
 
   const allowlist = (process.env.ADMIN_EMAILS ?? "")
     .split(",")
@@ -35,7 +31,10 @@ export default async function AdminPage() {
     );
   }
 
-  const { data } = await supabase.rpc("admin_counts").maybeSingle();
+  // 3. Fetch the typed data inside the function block where supabase is available
+  const { data } = await supabase
+    .rpc<"admin_counts", AdminStats>("admin_counts")
+    .maybeSingle();
 
   const stats = [
     { label: "Total users", value: data?.total_users ?? 0 },
