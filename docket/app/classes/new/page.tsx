@@ -16,16 +16,24 @@ export default function NewClassPage() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) return;
+  
     setError(null);
     startTransition(async () => {
       try {
         await createClass({ name, period, teacher, accentColor: color });
       } catch (err) {
-        unstable_rethrow(err);
+        // Next.js 14 client-side handling:
+        // If your Server Action uses redirect(), it throws an error that says "NEXT_REDIRECT".
+        // We check for this to avoid overriding the redirect behavior with an error state.
+        if (err instanceof Error && err.message === "NEXT_REDIRECT") {
+          throw err; 
+        }
+        
         setError(err instanceof Error ? err.message : "Something went wrong.");
       }
     });
   }
+
 
   return (
     <main className="min-h-screen px-6 py-10 max-w-md mx-auto">
