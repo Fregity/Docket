@@ -2,11 +2,17 @@ import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
-interface AdminStats {
-  total_users: number;
-  total_classes: number;
-  total_assignments: number;
-}
+// 1. Explicitly type the RPC response using your AdminStats interface
+const { data } = await supabase
+  .rpc<"admin_counts", AdminStats>("admin_counts")
+  .maybeSingle();
+
+const stats = [
+  { label: "Total users", value: data?.total_users ?? 0 },
+  { label: "Total classes", value: data?.total_classes ?? 0 },
+  { label: "Total assignments", value: data?.total_assignments ?? 0 },
+];
+
 
 export default async function AdminPage() {
   const supabase = await createClient();
