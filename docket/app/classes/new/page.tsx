@@ -2,7 +2,6 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { unstable_rethrow } from "next/navigation";
 import { createClass } from "@/lib/actions/classes";
 import { ACCENT_COLORS } from "@/lib/colors";
 
