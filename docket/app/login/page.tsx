@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-export default function LoginPage() {
+function LoginContent() {
   const router = useRouter();
   const params = useSearchParams();
   const next = params.get("next") || "/dashboard";
@@ -40,18 +40,22 @@ export default function LoginPage() {
       const { error } = await supabase.auth.signUp({
         email,
         password,
-        options: { data: { display_name: displayName || email.split("@")[0] } },
+        options: {
+          data: { display_name: displayName || email.split("@")[0] },
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
+        },
       });
+
       setLoading(false);
       if (error) return setError(error.message);
 
-      // If email confirmation is enabled in Supabase, there's no session yet.
       const { data } = await supabase.auth.getSession();
       if (!data.session) {
         setNotice("Check your email to confirm your account, then sign in.");
         setMode("signin");
         return;
       }
+
       router.push(next);
       router.refresh();
       return;
@@ -60,6 +64,7 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) return setError("That email and password don't match.");
+
     router.push(next);
     router.refresh();
   }
@@ -73,8 +78,7 @@ export default function LoginPage() {
         </h1>
 
         <button onClick={handleGoogle} className="btn-secondary w-full mb-4 gap-2">
-          <GoogleIcon />
-          Continue with Google
+          <GoogleIcon /> Continue with Google
         </button>
 
         <div className="flex items-center gap-3 my-5">
@@ -96,6 +100,7 @@ export default function LoginPage() {
               />
             </div>
           )}
+
           <div>
             <label className="label">Email</label>
             <input
@@ -106,6 +111,7 @@ export default function LoginPage() {
               required
             />
           </div>
+
           <div>
             <label className="label">Password</label>
             <input
@@ -141,6 +147,14 @@ export default function LoginPage() {
         </p>
       </div>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<main className="min-h-screen flex items-center justify-center">Loading...</main>}>
+      <LoginContent />
+    </Suspense>
   );
 }
 
