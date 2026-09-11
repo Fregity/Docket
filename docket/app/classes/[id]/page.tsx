@@ -79,15 +79,7 @@ export default async function ClassDetailPage({
 
         <div className="flex gap-3 mt-5">
           <ShareClass className={cls.name} inviteUrl={inviteUrl} autoOpen={invite === "1"} />
-          <AddHomeworkModal
-            classes={classOption}
-            lockedClassId={cls.id}
-            trigger={(open) => (
-              <button className="btn-primary" onClick={open}>
-                + Add homework
-              </button>
-            )}
-          />
+          <AddHomeworkModal classes={classOption} lockedClassId={cls.id} />
         </div>
       </header>
 
