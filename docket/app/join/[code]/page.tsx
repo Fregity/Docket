@@ -4,17 +4,24 @@ import { JoinButton } from "./JoinButton";
 
 export const dynamic = "force-dynamic";
 
+// 1. Define an interface matching what your SQL function returns
+interface ClassPreview {
+  name: string;
+  member_count: number;
+}
+
 export default async function JoinPage({ params }: { params: Promise<{ code: string }> }) {
   const { code } = await params;
   const supabase = await createClient();
 
-  const { data: preview } = await supabase
+  // 2. Cast the data type using "as" or pass the generic type if your client supports it
+  const { data } = await supabase
     .rpc("preview_class_by_code", { p_code: code })
     .maybeSingle();
+    
+  const preview = data as ClassPreview | null;
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
   if (!preview) {
     return (
@@ -23,9 +30,7 @@ export default async function JoinPage({ params }: { params: Promise<{ code: str
         <p className="text-muted text-[15px] mb-6">
           It may have been mistyped, or the class no longer exists.
         </p>
-        <Link href="/" className="btn-secondary">
-          Go home
-        </Link>
+        <Link href="/" className="btn-secondary"> Go home </Link>
       </main>
     );
   }
@@ -41,7 +46,6 @@ export default async function JoinPage({ params }: { params: Promise<{ code: str
             } already in it.`
           : "Be the first to join this class."}
       </p>
-
       {user ? (
         <JoinButton code={code} />
       ) : (
