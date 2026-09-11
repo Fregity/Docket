@@ -18,11 +18,13 @@ export async function createClass(input: {
     p_teacher: input.teacher?.trim() || "",
     p_accent_color: input.accentColor,
   });
+  const newClass = data as { id: string } | null;
 
-  if (error || !data) throw new Error("Couldn't create that class. Try again.");
+  if (error || !newClass) throw new Error("Couldn't create that class. Try again.");
 
   revalidatePath("/dashboard");
-  redirect(`/classes/${data.id}?invite=1`);
+  revalidatePath("/classes");
+  redirect(`/classes/${newClass.id}?invite=1`);
 }
 
 export async function joinClassByCode(code: string) {
@@ -31,9 +33,16 @@ export async function joinClassByCode(code: string) {
   const { data, error } = await supabase.rpc("join_class_by_code", {
     p_code: code.trim(),
   });
+  const joinedClass = data as { id: string } | null;
 
-  if (error || !data) {
+  if (error || !joinedClass) {
     throw new Error("This invite link isn't valid.");
+  }
+
+  revalidatePath("/dashboard");
+  revalidatePath("/classes");
+  redirect(`/classes/${joinedClass.id}`);
+}
   }
 
   revalidatePath("/dashboard");
