@@ -3,7 +3,6 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { unstable_rethrow } from "next/navigation";
 import { joinClassByCode } from "@/lib/actions/classes";
 
 export default function OnboardingPage() {
@@ -17,12 +16,16 @@ export default function OnboardingPage() {
   function handleJoin(e: React.FormEvent) {
     e.preventDefault();
     if (!code.trim()) return;
+
     setError(null);
     startTransition(async () => {
       try {
         await joinClassByCode(code);
-      } catch (err) {
-        unstable_rethrow(err);
+      } catch (err: any) {
+        // Next.js 14 internal redirect/not-found bypass
+        if (err?.digest?.startsWith("NEXT_REDIRECT") || err?.digest === "NEXT_NOT_FOUND") {
+          throw err;
+        }
         setError("This invite code isn't valid.");
       }
     });
@@ -41,8 +44,8 @@ export default function OnboardingPage() {
           <button className="btn-secondary" onClick={() => setShowJoin(true)}>
             Join a class
           </button>
-          <button
-            className="btn-ghost mt-2"
+          <button 
+            className="btn-ghost mt-2" 
             onClick={() => router.push("/dashboard")}
           >
             Skip for now
