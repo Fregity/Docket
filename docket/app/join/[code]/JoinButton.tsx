@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 // 1. Change the import to use isRedirectError
-import { isRedirectError } from "next/navigation"; 
+import { isRedirectError } from "next/dist/client/components/redirect";
 import { joinClassByCode } from "@/lib/actions/classes";
 
 export function JoinButton({ code }: { code: string }) {
