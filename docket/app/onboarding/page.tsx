@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { joinClassByCode } from "@/lib/actions/classes";
 
-export default function OnboardingPage() {
+// 1. Separate the logic using useSearchParams into its own component
+function OnboardingContent() {
   const router = useRouter();
   const params = useSearchParams();
   const [showJoin, setShowJoin] = useState(params.get("intent") === "join");
@@ -16,8 +17,8 @@ export default function OnboardingPage() {
   function handleJoin(e: React.FormEvent) {
     e.preventDefault();
     if (!code.trim()) return;
-
     setError(null);
+    
     startTransition(async () => {
       try {
         await joinClassByCode(code);
@@ -71,5 +72,19 @@ export default function OnboardingPage() {
         </form>
       )}
     </main>
+  );
+}
+
+// 2. Export a main component that wraps the content with a Suspense boundary
+export default function OnboardingPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen flex flex-col items-center justify-center px-6 text-center">
+        <p className="text-sm text-muted mb-2">Docket</p>
+        <h1 className="font-serif text-3xl mb-8 max-w-xs">Loading onboarding...</h1>
+      </main>
+    }>
+      <OnboardingContent />
+    </Suspense>
   );
 }
