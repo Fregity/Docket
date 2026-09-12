@@ -5,6 +5,8 @@ import { ColorDot, EmptyState, SectionLabel } from "@/components/ui";
 import { AssignmentCard, type AssignmentData } from "@/components/AssignmentCard";
 import { AddHomeworkModal } from "@/components/AddHomeworkModal";
 import { ShareClass } from "@/components/ShareClass";
+import { EditClassModal } from "@/components/EditClassModal";
+import { LeaveClassButton } from "@/components/LeaveClassButton";
 import { NavBar } from "@/components/NavBar";
 import { relativeDueLabel } from "@/lib/dates";
 
@@ -77,9 +79,17 @@ export default async function ClassDetailPage({
         </div>
         {cls.period && <p className="text-muted text-sm mt-1">Period {cls.period}</p>}
 
-        <div className="flex gap-3 mt-5">
+        <div className="flex flex-wrap gap-3 mt-5">
           <ShareClass className={cls.name} inviteUrl={inviteUrl} autoOpen={invite === "1"} />
           <AddHomeworkModal classes={classOption} lockedClassId={cls.id} />
+          <EditClassModal cls={cls} />
+        </div>
+        <div className="mt-1">
+          <LeaveClassButton
+            classId={cls.id}
+            className={cls.name}
+            isLastMember={members.length <= 1}
+          />
         </div>
       </header>
 
