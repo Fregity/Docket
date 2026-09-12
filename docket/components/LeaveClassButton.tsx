@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { unstable_rethrow } from "next/navigation";
 import { leaveClass } from "@/lib/actions/classes";
 
 export function LeaveClassButton({
@@ -23,7 +22,6 @@ export function LeaveClassButton({
       try {
         await leaveClass(classId);
       } catch (err) {
-        unstable_rethrow(err);
         setError(err instanceof Error ? err.message : "Something went wrong.");
       }
     });
