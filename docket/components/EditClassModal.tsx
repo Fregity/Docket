@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { unstable_rethrow } from "next/navigation";
 import { updateClass } from "@/lib/actions/classes";
 import { ACCENT_COLORS } from "@/lib/colors";
 
@@ -32,7 +31,6 @@ export function EditClassModal({ cls }: { cls: ClassInfo }) {
         await updateClass({ classId: cls.id, name, period, teacher, accentColor: color });
         setOpen(false);
       } catch (err) {
-        unstable_rethrow(err);
         setError(err instanceof Error ? err.message : "Something went wrong.");
       }
     });
