@@ -136,7 +136,7 @@ export default async function DashboardPage() {
       </main>
 
       {classes.length > 0 && (
-        <div className="fixed bottom-24 sm:bottom-8 right-6">
+        <div className="fixed bottom-24 right-6">
           <AddHomeworkModal classes={classes} />
         </div>
       )}
