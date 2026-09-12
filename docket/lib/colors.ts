@@ -14,6 +14,7 @@ export const ACCENT_COLORS = [
   { id: "violet", label: "Violet", hex: "#8355E8" },
   { id: "pink", label: "Pink", hex: "#E93D82" },
   { id: "charcoal", label: "Charcoal", hex: "#57534E" },
+  { id: "bone", label: "Bone", hex: "#D9CFC0" },
 ] as const;
 
 export type AccentColorId = (typeof ACCENT_COLORS)[number]["id"];
