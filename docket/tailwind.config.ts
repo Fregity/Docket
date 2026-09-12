@@ -1,16 +1,18 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  darkMode: "class",
   content: ["./app/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}"],
   theme: {
     extend: {
       colors: {
-        paper: "#FFFFFF",
-        ink: "#1C1C1A",
-        muted: "#6B6B63",
-        faint: "#9B9B90",
-        hairline: "#E8E6DF",
-        wash: "#FAFAF7",
+        paper: "var(--paper)",
+        ink: "var(--ink)",
+        muted: "var(--muted)",
+        faint: "var(--faint)",
+        hairline: "var(--hairline)",
+        wash: "var(--wash)",
+        danger: "var(--danger)",
       },
       fontFamily: {
         sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],

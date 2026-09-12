@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
+import { isNextRedirectError } from "@/lib/errors";
 import { createClass } from "@/lib/actions/classes";
 import { ACCENT_COLORS } from "@/lib/colors";
 
@@ -16,24 +17,16 @@ export default function NewClassPage() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) return;
-  
     setError(null);
     startTransition(async () => {
       try {
         await createClass({ name, period, teacher, accentColor: color });
       } catch (err) {
-        // Next.js 14 client-side handling:
-        // If your Server Action uses redirect(), it throws an error that says "NEXT_REDIRECT".
-        // We check for this to avoid overriding the redirect behavior with an error state.
-        if (err instanceof Error && err.message === "NEXT_REDIRECT") {
-          throw err; 
-        }
-        
+        if (isNextRedirectError(err)) throw err;
         setError(err instanceof Error ? err.message : "Something went wrong.");
       }
     });
   }
-
 
   return (
     <main className="min-h-screen px-6 py-10 max-w-md mx-auto">
@@ -82,7 +75,7 @@ export default function NewClassPage() {
                 className="w-8 h-8 rounded-full flex items-center justify-center"
                 style={{
                   backgroundColor: c.hex,
-                  outline: color === c.id ? "2px solid #1C1C1A" : "none",
+                  outline: color === c.id ? "2px solid var(--ink)" : "none",
                   outlineOffset: 2,
                 }}
               />
@@ -90,7 +83,7 @@ export default function NewClassPage() {
           </div>
         </div>
 
-        {error && <p className="text-sm" style={{ color: "#9C4A32" }}>{error}</p>}
+        {error && <p className="text-sm text-danger">{error}</p>}
 
         <button type="submit" className="btn-primary mt-3" disabled={pending}>
           {pending ? "Creating…" : "Create class"}

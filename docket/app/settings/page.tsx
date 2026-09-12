@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { signOut, updateDisplayName } from "@/lib/actions/account";
 import { NavBar } from "@/components/NavBar";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export const dynamic = "force-dynamic";
 
@@ -49,6 +50,8 @@ export default async function SettingsPage() {
           <label className="label">Email</label>
           <p className="text-[15px] text-ink">{profile?.email}</p>
         </div>
+
+        <ThemeToggle />
 
         <form action={signOut}>
           <button type="submit" className="btn-ghost">

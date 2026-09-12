@@ -81,7 +81,7 @@ export function EditClassModal({ cls }: { cls: ClassInfo }) {
                     className="w-8 h-8 rounded-full"
                     style={{
                       backgroundColor: c.hex,
-                      outline: color === c.id ? "2px solid #1C1C1A" : "none",
+                      outline: color === c.id ? "2px solid var(--ink)" : "none",
                       outlineOffset: 2,
                     }}
                   />
@@ -89,7 +89,7 @@ export function EditClassModal({ cls }: { cls: ClassInfo }) {
               </div>
             </div>
 
-            {error && <p className="text-sm mb-4" style={{ color: "#9C4A32" }}>{error}</p>}
+            {error && <p className="text-sm mb-4 text-danger">{error}</p>}
 
             <div className="flex gap-3">
               <button type="button" className="btn-secondary flex-1" onClick={() => setOpen(false)}>

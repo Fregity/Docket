@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { isNextRedirectError } from "@/lib/errors";
 import { leaveClass } from "@/lib/actions/classes";
 
 export function LeaveClassButton({
@@ -22,6 +23,7 @@ export function LeaveClassButton({
       try {
         await leaveClass(classId);
       } catch (err) {
+        if (isNextRedirectError(err)) throw err;
         setError(err instanceof Error ? err.message : "Something went wrong.");
       }
     });
@@ -29,7 +31,7 @@ export function LeaveClassButton({
 
   return (
     <>
-      <button className="btn-ghost" style={{ color: "#9C4A32" }} onClick={() => setOpen(true)}>
+      <button className="btn-ghost text-danger" onClick={() => setOpen(true)}>
         {isLastMember ? "Delete class" : "Leave class"}
       </button>
 
@@ -51,7 +53,7 @@ export function LeaveClassButton({
                 : "You'll no longer see this class's homework. Other members can keep using it, and you can rejoin later with the invite link."}
             </p>
 
-            {error && <p className="text-sm mb-4" style={{ color: "#9C4A32" }}>{error}</p>}
+            {error && <p className="text-sm mb-4 text-danger">{error}</p>}
 
             <div className="flex gap-3">
               <button className="btn-secondary flex-1" onClick={() => setOpen(false)}>
@@ -59,7 +61,7 @@ export function LeaveClassButton({
               </button>
               <button
                 className="btn-primary flex-1"
-                style={{ backgroundColor: "#9C4A32" }}
+                style={{ backgroundColor: "var(--danger)" }}
                 onClick={handleConfirm}
                 disabled={pending}
               >

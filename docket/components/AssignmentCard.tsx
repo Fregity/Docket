@@ -89,7 +89,7 @@ export function AssignmentCard({
           <p className="text-sm text-muted mt-0.5">{assignment.description}</p>
         )}
         <div className="flex items-center gap-2 mt-1.5">
-          <span className={`font-serif text-sm ${overdue ? "" : "text-muted"}`} style={overdue ? { color: "#9C4A32" } : undefined}>
+          <span className={`font-serif text-sm ${overdue ? "text-danger" : "text-muted"}`}>
             {relativeDueLabel(assignment.due_date)}
           </span>
           <span className="text-faint text-xs">·</span>
@@ -141,8 +141,7 @@ export function AssignmentCard({
                 {completed ? "Mark incomplete" : "Mark complete"}
               </button>
               <button
-                className="w-full text-left px-4 py-2.5 text-sm hover:bg-wash"
-                style={{ color: "#9C4A32" }}
+                className="w-full text-left px-4 py-2.5 text-sm hover:bg-wash text-danger"
                 onClick={handleDelete}
               >
                 Delete

@@ -2,6 +2,26 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --paper: #ffffff;
+  --ink: #1c1c1a;
+  --muted: #6b6b63;
+  --faint: #9b9b90;
+  --hairline: #e8e6df;
+  --wash: #fafaf7;
+  --danger: #9c4a32;
+}
+
+.dark {
+  --paper: #1a1a18;
+  --ink: #f3f2ed;
+  --muted: #a6a49a;
+  --faint: #78766c;
+  --hairline: #333330;
+  --wash: #232320;
+  --danger: #e0846a;
+}
+
 @layer base {
   * {
     @apply border-hairline;
@@ -13,11 +33,11 @@
     @apply bg-paper text-ink antialiased;
   }
   ::selection {
-    background: #1c1c1a;
-    color: #fff;
+    background: var(--ink);
+    color: var(--paper);
   }
   :focus-visible {
-    outline: 2px solid #1c1c1a;
+    outline: 2px solid var(--ink);
     outline-offset: 2px;
   }
   @media (prefers-reduced-motion: reduce) {
