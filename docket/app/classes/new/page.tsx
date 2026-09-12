@@ -75,7 +75,7 @@ export default function NewClassPage() {
                 className="w-8 h-8 rounded-full flex items-center justify-center"
                 style={{
                   backgroundColor: c.hex,
-                  outline: color === c.id ? "2px solid var(--ink)" : "none",
+                  outline: color === c.id ? "2px solid rgb(var(--ink))" : "none",
                   outlineOffset: 2,
                 }}
               />

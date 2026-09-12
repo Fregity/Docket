@@ -3,23 +3,23 @@
 @tailwind utilities;
 
 :root {
-  --paper: #ffffff;
-  --ink: #1c1c1a;
-  --muted: #6b6b63;
-  --faint: #9b9b90;
-  --hairline: #e8e6df;
-  --wash: #fafaf7;
-  --danger: #9c4a32;
+  --paper: 255 255 255;
+  --ink: 28 28 26;
+  --muted: 107 107 99;
+  --faint: 155 155 144;
+  --hairline: 232 230 223;
+  --wash: 250 250 247;
+  --danger: 156 74 50;
 }
 
 .dark {
-  --paper: #1a1a18;
-  --ink: #f3f2ed;
-  --muted: #a6a49a;
-  --faint: #78766c;
-  --hairline: #333330;
-  --wash: #232320;
-  --danger: #e0846a;
+  --paper: 26 26 24;
+  --ink: 243 242 237;
+  --muted: 166 164 154;
+  --faint: 120 118 108;
+  --hairline: 51 51 48;
+  --wash: 35 35 32;
+  --danger: 224 132 106;
 }
 
 @layer base {
@@ -33,11 +33,11 @@
     @apply bg-paper text-ink antialiased;
   }
   ::selection {
-    background: var(--ink);
-    color: var(--paper);
+    background: rgb(var(--ink));
+    color: rgb(var(--paper));
   }
   :focus-visible {
-    outline: 2px solid var(--ink);
+    outline: 2px solid rgb(var(--ink));
     outline-offset: 2px;
   }
   @media (prefers-reduced-motion: reduce) {
@@ -52,10 +52,10 @@
 
 @layer components {
   .btn {
-    @apply inline-flex items-center justify-center rounded-xl px-5 py-3 text-[15px] font-medium transition-colors duration-150;
+    @apply inline-flex items-center justify-center rounded-xl px-5 py-3 text-[15px] font-medium transition-all duration-150;
   }
   .btn-primary {
-    @apply btn bg-ink text-paper hover:bg-ink/85;
+    @apply btn bg-ink text-paper hover:opacity-90;
   }
   .btn-secondary {
     @apply btn bg-transparent text-ink border border-hairline hover:bg-wash;

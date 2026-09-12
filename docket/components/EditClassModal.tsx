@@ -81,7 +81,7 @@ export function EditClassModal({ cls }: { cls: ClassInfo }) {
                     className="w-8 h-8 rounded-full"
                     style={{
                       backgroundColor: c.hex,
-                      outline: color === c.id ? "2px solid var(--ink)" : "none",
+                      outline: color === c.id ? "2px solid rgb(var(--ink))" : "none",
                       outlineOffset: 2,
                     }}
                   />

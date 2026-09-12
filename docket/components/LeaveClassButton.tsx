@@ -61,7 +61,7 @@ export function LeaveClassButton({
               </button>
               <button
                 className="btn-primary flex-1"
-                style={{ backgroundColor: "var(--danger)" }}
+                style={{ backgroundColor: "rgb(var(--danger))" }}
                 onClick={handleConfirm}
                 disabled={pending}
               >

@@ -6,13 +6,13 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        paper: "var(--paper)",
-        ink: "var(--ink)",
-        muted: "var(--muted)",
-        faint: "var(--faint)",
-        hairline: "var(--hairline)",
-        wash: "var(--wash)",
-        danger: "var(--danger)",
+        paper: "rgb(var(--paper) / <alpha-value>)",
+        ink: "rgb(var(--ink) / <alpha-value>)",
+        muted: "rgb(var(--muted) / <alpha-value>)",
+        faint: "rgb(var(--faint) / <alpha-value>)",
+        hairline: "rgb(var(--hairline) / <alpha-value>)",
+        wash: "rgb(var(--wash) / <alpha-value>)",
+        danger: "rgb(var(--danger) / <alpha-value>)",
       },
       fontFamily: {
         sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
