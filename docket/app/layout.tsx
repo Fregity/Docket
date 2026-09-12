@@ -20,6 +20,9 @@ export const metadata: Metadata = {
     statusBarStyle: "default",
     title: "Docket",
   },
+  icons: {
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export const viewport: Viewport = {
