@@ -3,16 +3,17 @@
 // picker, so colors stay bold and readable rather than drifting into pale or
 // clashing territory.
 export const ACCENT_COLORS = [
-  { id: "blue", label: "Blue", hex: "#3B6FE0" },
   { id: "red", label: "Red", hex: "#E5484D" },
   { id: "orange", label: "Orange", hex: "#F2762E" },
-  { id: "violet", label: "Violet", hex: "#8355E8" },
-  { id: "teal", label: "Teal", hex: "#12A594" },
-  { id: "pink", label: "Pink", hex: "#E93D82" },
+  { id: "gold", label: "Gold", hex: "#E0A72E" },
   { id: "green", label: "Green", hex: "#29A344" },
-  { id: "gold", label: "Gold", hex: "#E8A324" },
+  { id: "teal", label: "Teal", hex: "#12A594" },
+  { id: "cyan", label: "Cyan", hex: "#1698C9" },
+  { id: "blue", label: "Blue", hex: "#3B6FE0" },
   { id: "indigo", label: "Indigo", hex: "#5B5BD6" },
-  { id: "coral", label: "Coral", hex: "#FF6B57" },
+  { id: "violet", label: "Violet", hex: "#8355E8" },
+  { id: "pink", label: "Pink", hex: "#E93D82" },
+  { id: "charcoal", label: "Charcoal", hex: "#57534E" },
 ] as const;
 
 export type AccentColorId = (typeof ACCENT_COLORS)[number]["id"];

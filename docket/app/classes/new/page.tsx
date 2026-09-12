@@ -40,7 +40,7 @@ export default function NewClassPage() {
           <label className="label">Class name</label>
           <input
             className="input"
-            placeholder="Precalculus"
+            placeholder="History"
             value={name}
             onChange={(e) => setName(e.target.value)}
             autoFocus
@@ -50,14 +50,14 @@ export default function NewClassPage() {
 
         <div>
           <label className="label">Period (optional)</label>
-          <input className="input" placeholder="3" value={period} onChange={(e) => setPeriod(e.target.value)} />
+          <input className="input" placeholder="1" value={period} onChange={(e) => setPeriod(e.target.value)} />
         </div>
 
         <div>
           <label className="label">Teacher (optional)</label>
           <input
             className="input"
-            placeholder="Ms. Smith"
+            placeholder="Mr. Smith"
             value={teacher}
             onChange={(e) => setTeacher(e.target.value)}
           />
