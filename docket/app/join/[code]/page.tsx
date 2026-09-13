@@ -37,7 +37,7 @@ export default async function JoinPage({ params }: { params: Promise<{ code: str
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center px-6 text-center">
-      <p className="text-sm text-muted mb-2">Docket</p>
+      <p className="text-sm text-muted mb-2">DueBird</p>
       <h1 className="font-serif text-3xl mb-2">Join {preview.name}?</h1>
       <p className="text-muted text-[15px] mb-8">
         {preview.member_count > 0

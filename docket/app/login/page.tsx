@@ -72,7 +72,7 @@ function LoginContent() {
   return (
     <main className="min-h-screen flex flex-col items-center justify-center px-6 py-12">
       <div className="w-full max-w-sm">
-        <p className="text-sm text-muted text-center mb-2">Docket</p>
+        <p className="text-sm text-muted text-center mb-2">DueBird</p>
         <h1 className="font-serif text-3xl text-center mb-8">
           {mode === "signin" ? "Welcome back" : "Create your account"}
         </h1>
@@ -133,7 +133,7 @@ function LoginContent() {
         </form>
 
         <p className="text-center text-sm text-muted mt-6">
-          {mode === "signin" ? "New to Docket?" : "Already have an account?"}{" "}
+          {mode === "signin" ? "New to DueBird?" : "Already have an account?"}{" "}
           <button
             className="text-ink underline underline-offset-2"
             onClick={() => {

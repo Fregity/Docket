@@ -1,6 +1,6 @@
 {
-  "name": "Docket",
-  "short_name": "Docket",
+  "name": "DueBird",
+  "short_name": "DueBird",
   "description": "Stop asking the group chat what the homework was.",
   "start_url": "/dashboard",
   "display": "standalone",

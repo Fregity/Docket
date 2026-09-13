@@ -24,8 +24,8 @@ export function ShareClass({
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `Join ${className} on Docket`,
-          text: `Join ${className} on Docket so we can stop asking what the homework is.`,
+          title: `Join ${className} on DueBird`,
+          text: `Join ${className} on DueBird so we can stop asking what the homework is.`,
           url: inviteUrl,
         });
       } catch {

@@ -12,13 +12,13 @@ const serif = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: "Docket",
+  title: "DueBird",
   description: "Stop asking the group chat what the homework was.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Docket",
+    title: "DueBird",
   },
   icons: {
     apple: "/apple-touch-icon.png",

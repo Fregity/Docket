@@ -34,7 +34,7 @@ function OnboardingContent() {
 
   return (
     <main className="min-h-screen flex flex-col items-center justify-center px-6 text-center">
-      <p className="text-sm text-muted mb-2">Docket</p>
+      <p className="text-sm text-muted mb-2">DueBird</p>
       <h1 className="font-serif text-3xl mb-8 max-w-xs">Let&rsquo;s get your classes set up.</h1>
 
       {!showJoin ? (
@@ -80,7 +80,7 @@ export default function OnboardingPage() {
   return (
     <Suspense fallback={
       <main className="min-h-screen flex flex-col items-center justify-center px-6 text-center">
-        <p className="text-sm text-muted mb-2">Docket</p>
+        <p className="text-sm text-muted mb-2">DueBird</p>
         <h1 className="font-serif text-3xl mb-8 max-w-xs">Loading onboarding...</h1>
       </main>
     }>

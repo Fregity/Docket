@@ -4,7 +4,7 @@ export default function LandingPage() {
   return (
     <main className="min-h-screen flex flex-col">
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-20 text-center">
-        <p className="text-sm text-muted tracking-wide mb-6">Docket</p>
+        <p className="text-sm text-muted tracking-wide mb-6">DueBird</p>
         <h1 className="font-serif text-4xl sm:text-5xl leading-tight max-w-lg text-ink">
           What did we have for homework?
         </h1>
