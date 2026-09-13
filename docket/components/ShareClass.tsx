@@ -5,19 +5,28 @@ import { useState } from "react";
 export function ShareClass({
   className,
   inviteUrl,
+  inviteCode,
   autoOpen,
 }: {
   className: string;
   inviteUrl: string;
+  inviteCode: string;
   autoOpen?: boolean;
 }) {
   const [open, setOpen] = useState(!!autoOpen);
-  const [copied, setCopied] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
+  const [copiedCode, setCopiedCode] = useState(false);
 
-  async function handleCopy() {
+  async function handleCopyLink() {
     await navigator.clipboard.writeText(inviteUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setCopiedLink(true);
+    setTimeout(() => setCopiedLink(false), 2000);
+  }
+
+  async function handleCopyCode() {
+    await navigator.clipboard.writeText(inviteCode);
+    setCopiedCode(true);
+    setTimeout(() => setCopiedCode(false), 2000);
   }
 
   async function handleNativeShare() {
@@ -55,17 +64,28 @@ export function ShareClass({
             <p className="text-muted text-[15px] mb-5">
               {autoOpen
                 ? "Invite your classmates so everyone can keep the homework updated."
-                : "Send this link to your class group chat."}
+                : "Send this link to your class group chat, or share the code directly."}
             </p>
 
-            <div className="rounded-xl border border-hairline bg-wash px-4 py-3 text-sm text-ink mb-4 break-all">
+            <label className="label">Invite link</label>
+            <div className="rounded-xl border border-hairline bg-wash px-4 py-3 text-sm text-ink mb-2 break-all">
               {inviteUrl}
+            </div>
+            <button className="btn-primary w-full mb-5" onClick={handleCopyLink}>
+              {copiedLink ? "Link copied!" : "Copy invite link"}
+            </button>
+
+            <label className="label">Invite code</label>
+            <div className="flex items-center gap-3 mb-5">
+              <div className="flex-1 rounded-xl border border-hairline bg-wash px-4 py-3 text-lg tracking-widest font-serif text-ink text-center">
+                {inviteCode}
+              </div>
+              <button className="btn-secondary" onClick={handleCopyCode}>
+                {copiedCode ? "Copied!" : "Copy"}
+              </button>
             </div>
 
             <div className="flex flex-col gap-2">
-              <button className="btn-primary" onClick={handleCopy}>
-                {copied ? "Link copied!" : "Copy invite link"}
-              </button>
               {typeof navigator !== "undefined" && "share" in navigator && (
                 <button className="btn-secondary" onClick={handleNativeShare}>
                   Share
