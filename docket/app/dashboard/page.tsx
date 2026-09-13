@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { reorderClass } from "@/lib/actions/classes";
 import { bucketForDate, BUCKET_LABELS, type DueBucket } from "@/lib/dates";
 import { AssignmentCard, type AssignmentData } from "@/components/AssignmentCard";
 import { AddHomeworkModal } from "@/components/AddHomeworkModal";
@@ -23,8 +24,9 @@ export default async function DashboardPage() {
 
   const { data: memberships } = await supabase
     .from("class_members")
-    .select("classes(id, name, accent_color)")
-    .eq("user_id", user.id);
+    .select("classes(id, name, accent_color), position")
+    .eq("user_id", user.id)
+    .order("position", { ascending: true });
 
   const classes = (memberships ?? [])
     .map((m) => (Array.isArray(m.classes) ? m.classes[0] : m.classes))
@@ -115,17 +117,42 @@ export default async function DashboardPage() {
                 )
             )}
 
-            <SectionLabel>My classes</SectionLabel>
+            <div className="flex items-center justify-between mt-8 mb-3">
+              <h3 className="font-serif text-lg text-ink">My classes</h3>
+              <Link href="/onboarding?intent=join" className="text-sm text-muted underline underline-offset-2">
+                Join a class
+              </Link>
+            </div>
             <div className="flex flex-col gap-2">
-              {classes.map((c) => (
-                <Link
-                  key={c.id}
-                  href={`/classes/${c.id}`}
-                  className="card flex items-center gap-3 hover:bg-wash transition-colors"
-                >
-                  <ColorDot colorId={c.accent_color} size={10} />
-                  <span className="text-[15px]">{c.name}</span>
-                </Link>
+              {classes.map((c, idx) => (
+                <div key={c.id} className="card flex items-center gap-3">
+                  <Link href={`/classes/${c.id}`} className="flex items-center gap-3 flex-1 min-w-0">
+                    <ColorDot colorId={c.accent_color} size={10} />
+                    <span className="text-[15px] truncate">{c.name}</span>
+                  </Link>
+                  <div className="flex flex-col shrink-0">
+                    <form action={reorderClass.bind(null, c.id, "up")}>
+                      <button
+                        type="submit"
+                        disabled={idx === 0}
+                        aria-label="Move up"
+                        className="block px-1.5 text-faint hover:text-ink disabled:opacity-30 disabled:hover:text-faint"
+                      >
+                        ▲
+                      </button>
+                    </form>
+                    <form action={reorderClass.bind(null, c.id, "down")}>
+                      <button
+                        type="submit"
+                        disabled={idx === classes.length - 1}
+                        aria-label="Move down"
+                        className="block px-1.5 text-faint hover:text-ink disabled:opacity-30 disabled:hover:text-faint"
+                      >
+                        ▼
+                      </button>
+                    </form>
+                  </div>
+                </div>
               ))}
               <Link href="/classes/new" className="text-sm text-muted underline underline-offset-2 mt-1">
                 + New class
