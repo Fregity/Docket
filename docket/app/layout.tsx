@@ -38,7 +38,7 @@ export const viewport: Viewport = {
 const THEME_INIT_SCRIPT = `
 (function () {
   try {
-    var stored = localStorage.getItem('docket-theme');
+    var stored = localStorage.getItem('duebird-theme');
     var isDark = stored === 'dark' || (stored !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
     if (isDark) document.documentElement.classList.add('dark');
   } catch (e) {}

@@ -24,7 +24,7 @@ export async function updateSession(request: NextRequest) {
   // unauthenticated rather than crashing every page with a 500.
   if (!supabaseUrl || !supabaseAnonKey) {
     console.error(
-      "Docket: NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY are not set — skipping auth check."
+      "DueBird: NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY are not set — skipping auth check."
     );
     return response;
   }
