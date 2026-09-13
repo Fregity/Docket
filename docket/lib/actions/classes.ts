@@ -81,3 +81,34 @@ export async function leaveClass(classId: string) {
   revalidatePath("/classes");
   redirect("/classes");
 }
+
+export async function reorderClass(classId: string, direction: "up" | "down") {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  const { data: memberships } = await supabase
+    .from("class_members")
+    .select("id, class_id, position")
+    .eq("user_id", user.id)
+    .order("position", { ascending: true });
+
+  if (!memberships) return;
+
+  const index = memberships.findIndex((m) => m.class_id === classId);
+  if (index === -1) return;
+
+  const swapIndex = direction === "up" ? index - 1 : index + 1;
+  if (swapIndex < 0 || swapIndex >= memberships.length) return;
+
+  const current = memberships[index];
+  const swap = memberships[swapIndex];
+
+  await supabase.from("class_members").update({ position: swap.position }).eq("id", current.id);
+  await supabase.from("class_members").update({ position: current.position }).eq("id", swap.id);
+
+  revalidatePath("/dashboard");
+  revalidatePath("/classes");
+}
