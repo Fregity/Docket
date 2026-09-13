@@ -21,13 +21,13 @@ export function ThemeToggle() {
   const [choice, setChoice] = useState<ThemeChoice>("system");
 
   useEffect(() => {
-    const stored = localStorage.getItem("docket-theme") as ThemeChoice | null;
+    const stored = localStorage.getItem("duebird-theme") as ThemeChoice | null;
     if (stored) setChoice(stored);
   }, []);
 
   function handleChange(next: ThemeChoice) {
     setChoice(next);
-    localStorage.setItem("docket-theme", next);
+    localStorage.setItem("duebird-theme", next);
     applyTheme(next);
   }
 
