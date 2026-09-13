@@ -80,7 +80,7 @@ export default async function ClassDetailPage({
         {cls.period && <p className="text-muted text-sm mt-1">Period {cls.period}</p>}
 
         <div className="flex flex-wrap gap-3 mt-5">
-          <ShareClass className={cls.name} inviteUrl={inviteUrl} autoOpen={invite === "1"} />
+          <ShareClass className={cls.name} inviteUrl={inviteUrl} inviteCode={cls.invite_code} autoOpen={invite === "1"} />
           <AddHomeworkModal classes={classOption} lockedClassId={cls.id} />
           <EditClassModal cls={cls} />
         </div>
