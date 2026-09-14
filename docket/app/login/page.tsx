@@ -14,7 +14,9 @@ function LoginContent() {
   const [password, setPassword] = useState("");
   const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(
+    params.get("error") === "oauth" ? "That sign-in attempt didn't go through — please try again." : null
+  );
   const [notice, setNotice] = useState<string | null>(null);
 
   const supabase = createClient();
