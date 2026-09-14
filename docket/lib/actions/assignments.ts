@@ -60,16 +60,31 @@ export async function toggleAssignmentComplete(input: {
   completed: boolean;
 }) {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("not_authenticated");
 
-  const { error } = await supabase
-    .from("assignments")
-    .update({ completed: input.completed, updated_at: new Date().toISOString() })
-    .eq("id", input.id);
-
-  if (error) throw new Error("Couldn't update that assignment. Try again.");
+  if (input.completed) {
+    const { error } = await supabase
+      .from("assignment_completions")
+      .upsert(
+        { assignment_id: input.id, user_id: user.id },
+        { onConflict: "assignment_id,user_id", ignoreDuplicates: true }
+      );
+    if (error) throw new Error("Couldn't update that assignment. Try again.");
+  } else {
+    const { error } = await supabase
+      .from("assignment_completions")
+      .delete()
+      .eq("assignment_id", input.id)
+      .eq("user_id", user.id);
+    if (error) throw new Error("Couldn't update that assignment. Try again.");
+  }
 
   revalidatePath("/dashboard");
   revalidatePath(`/classes/${input.classId}`);
+  revalidatePath("/history");
 }
 
 export async function deleteAssignment(input: { id: string; classId: string }) {

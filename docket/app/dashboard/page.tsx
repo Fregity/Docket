@@ -38,10 +38,10 @@ export default async function DashboardPage() {
 
   if (classIds.length > 0) {
     const { data } = await supabase
-      .from("assignments")
-      .select("id, class_id, title, description, due_date, completed, classes(name, accent_color), profiles(display_name)")
+      .from("assignments_with_completion")
+      .select("id, class_id, title, description, due_date, completed_for_me, classes(name, accent_color), profiles(display_name)")
       .in("class_id", classIds)
-      .eq("completed", false)
+      .eq("completed_for_me", false)
       .order("due_date", { ascending: true });
 
     assignments = (data ?? []).map((a: any) => ({
@@ -50,7 +50,7 @@ export default async function DashboardPage() {
       title: a.title,
       description: a.description,
       due_date: a.due_date,
-      completed: a.completed,
+      completed: a.completed_for_me,
       created_by_name: a.profiles?.display_name ?? "Someone",
       className: a.classes?.name ?? "",
       accentColor: a.classes?.accent_color ?? "olive",

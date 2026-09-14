@@ -41,8 +41,8 @@ export default async function ClassDetailPage({
     .filter(Boolean) as { display_name: string }[];
 
   const { data: assignmentRows } = await supabase
-    .from("assignments")
-    .select("id, class_id, title, description, due_date, completed, created_at, profiles(display_name)")
+    .from("assignments_with_completion")
+    .select("id, class_id, title, description, due_date, completed_for_me, created_at, profiles(display_name)")
     .eq("class_id", id)
     .order("due_date", { ascending: true });
 
@@ -52,7 +52,7 @@ export default async function ClassDetailPage({
     title: a.title,
     description: a.description,
     due_date: a.due_date,
-    completed: a.completed,
+    completed: a.completed_for_me,
     created_at: a.created_at,
     created_by_name: a.profiles?.display_name ?? "Someone",
   }));
