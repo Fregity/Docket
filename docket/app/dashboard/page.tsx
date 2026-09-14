@@ -6,6 +6,7 @@ import { AssignmentCard, type AssignmentData } from "@/components/AssignmentCard
 import { AddHomeworkModal } from "@/components/AddHomeworkModal";
 import { ColorDot, EmptyState, SectionLabel } from "@/components/ui";
 import { NavBar } from "@/components/NavBar";
+import { Greeting } from "@/components/Greeting";
 
 export const dynamic = "force-dynamic";
 
@@ -63,16 +64,12 @@ export default async function DashboardPage() {
     items: assignments.filter((a) => bucketForDate(a.due_date) === b),
   }));
 
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
   const firstName = (profile?.display_name ?? "there").split(" ")[0];
 
   return (
     <div className="min-h-screen pb-24">
       <header className="px-6 pt-10 pb-4 max-w-2xl mx-auto">
-        <h1 className="font-serif text-3xl text-ink">
-          {greeting}, {firstName}
-        </h1>
+        <Greeting firstName={firstName} />
       </header>
 
       <main className="px-6 max-w-2xl mx-auto">
