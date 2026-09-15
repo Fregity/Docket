@@ -36,6 +36,10 @@ export const viewport: Viewport = {
   maximumScale: 1,
 };
 
+// Runs before hydration so the correct theme class is on <html> before the
+// very first paint — avoids a flash of the wrong theme on load. Reads the
+// user's saved preference (set via the toggle in Settings); falls back to
+// the OS-level preference if they've never chosen one.
 const THEME_INIT_SCRIPT = `
 (function () {
   try {
@@ -45,21 +49,6 @@ const THEME_INIT_SCRIPT = `
   } catch (e) {}
 })();
 `;
-
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <html lang="en" className={`${GeistSans.variable} ${serif.variable}`}>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
-      </head>
-      <body className="min-h-screen font-sans">{children}</body>
-    </html>
-  );
-}
 
 export default function RootLayout({
   children,
