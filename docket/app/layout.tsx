@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
 import { Fraunces } from "next/font/google";
+import { ThemeSync } from "@/components/ThemeSync";
 import "./globals.css";
 
 const serif = Fraunces({
@@ -56,6 +57,24 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
       <body className="min-h-screen font-sans">{children}</body>
+    </html>
+  );
+}
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en" className={`${GeistSans.variable} ${serif.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
+      <body className="min-h-screen font-sans">
+        <ThemeSync />
+        {children}
+      </body>
     </html>
   );
 }
