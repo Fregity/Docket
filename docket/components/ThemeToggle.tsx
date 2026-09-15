@@ -1,8 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
-type ThemeChoice = "light" | "dark" | "system";
+import {
+  type ThemeChoice,
+  getStoredThemeChoice,
+  setStoredThemeChoice,
+  computeIsDark,
+} from "@/lib/theme";
 
 const OPTIONS: { value: ThemeChoice; label: string }[] = [
   { value: "light", label: "Light" },
@@ -10,25 +14,17 @@ const OPTIONS: { value: ThemeChoice; label: string }[] = [
   { value: "system", label: "System" },
 ];
 
-function applyTheme(choice: ThemeChoice) {
-  const isDark =
-    choice === "dark" ||
-    (choice === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
-  document.documentElement.classList.toggle("dark", isDark);
-}
-
 export function ThemeToggle() {
   const [choice, setChoice] = useState<ThemeChoice>("system");
 
   useEffect(() => {
-    const stored = localStorage.getItem("duebird-theme") as ThemeChoice | null;
-    if (stored) setChoice(stored);
+    setChoice(getStoredThemeChoice());
   }, []);
 
   function handleChange(next: ThemeChoice) {
     setChoice(next);
-    localStorage.setItem("duebird-theme", next);
-    applyTheme(next);
+    setStoredThemeChoice(next);
+    document.documentElement.classList.toggle("dark", computeIsDark(next));
   }
 
   return (
