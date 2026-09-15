@@ -39,7 +39,7 @@ export const viewport: Viewport = {
 // Runs before hydration so the correct theme class is on <html> before the
 // very first paint — avoids a flash of the wrong theme on load. Reads the
 // user's saved preference (set via the toggle in Settings); falls back to
-// the OS-level preference if they've never chosen one.
+// the OS-level preference if they've never chosen one
 const THEME_INIT_SCRIPT = `
 (function () {
   try {
