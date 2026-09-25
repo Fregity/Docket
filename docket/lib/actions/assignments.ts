@@ -8,6 +8,7 @@ export async function addAssignment(input: {
   title: string;
   description?: string;
   dueDate: string;
+  recurring?: boolean;
 }) {
   const supabase = await createClient();
   const {
@@ -20,6 +21,7 @@ export async function addAssignment(input: {
     title: input.title.trim(),
     description: input.description?.trim() || null,
     due_date: input.dueDate,
+    recurrence: input.recurring ? "weekly" : null,
     created_by: user.id,
   });
 

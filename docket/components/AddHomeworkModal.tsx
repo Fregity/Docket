@@ -41,6 +41,7 @@ export function AddHomeworkModal({
   const [description, setDescription] = useState(existing?.description ?? "");
   const [dueDate, setDueDate] = useState(existing?.due_date ?? isoDateFromOffset(1));
   const [customDate, setCustomDate] = useState(false);
+  const [recurring, setRecurring] = useState(false);
 
   function close() {
     setOpen(false);
@@ -63,12 +64,13 @@ export function AddHomeworkModal({
             dueDate,
           });
         } else {
-          await addAssignment({ classId, title, description, dueDate });
+          await addAssignment({ classId, title, description, dueDate, recurring });
         }
         setOpen(false);
         setTitle("");
         setDescription("");
         setCustomDate(false);
+        setRecurring(false);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Something went wrong.");
       }
@@ -186,7 +188,19 @@ export function AddHomeworkModal({
               />
             </div>
 
-            {error && <p className="text-sm mb-4" style={{ color: "#9C4A32" }}>{error}</p>}
+            {!existing && (
+              <label className="flex items-center gap-2.5 mb-6 text-[15px] text-ink cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={recurring}
+                  onChange={(e) => setRecurring(e.target.checked)}
+                  className="w-4 h-4 rounded border-hairline accent-ink"
+                />
+                Repeats weekly
+              </label>
+            )}
+
+            {error && <p className="text-sm mb-4 text-danger">{error}</p>}
 
             <div className="flex gap-3">
               <button type="button" className="btn-secondary flex-1" onClick={close}>

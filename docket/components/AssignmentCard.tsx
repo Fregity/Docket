@@ -14,6 +14,7 @@ export type AssignmentData = {
   due_date: string;
   completed: boolean;
   created_by_name: string;
+  recurrence?: string | null;
 };
 
 export function AssignmentCard({
@@ -56,7 +57,7 @@ export function AssignmentCard({
     });
   }
 
-  const overdue = !completed && relativeDueLabel(assignment.due_date).includes("overdue");
+  const overdue = !completed && relativeDueLabel(assignment.due_date, completed).includes("overdue");
 
   return (
     <div className="card flex items-start gap-3 animate-fade-in">
@@ -90,8 +91,13 @@ export function AssignmentCard({
         )}
         <div className="flex items-center gap-2 mt-1.5">
           <span className={`font-serif text-sm ${overdue ? "text-danger" : "text-muted"}`}>
-            {relativeDueLabel(assignment.due_date)}
+            {relativeDueLabel(assignment.due_date, completed)}
           </span>
+          {assignment.recurrence === "weekly" && (
+            <span className="text-xs text-faint" title="Repeats weekly">
+              ↻ Weekly
+            </span>
+          )}
           <span className="text-faint text-xs">·</span>
           <span className="text-xs text-faint">Added by {assignment.created_by_name}</span>
         </div>

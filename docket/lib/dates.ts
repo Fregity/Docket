@@ -16,7 +16,6 @@ export function isoDateFromOffset(daysFromToday: number): string {
   return d.toISOString().slice(0, 10);
 }
 
-/** Next occurrence (today counts) of a given weekday, 0=Sunday..6=Saturday. */
 export function isoDateForNextWeekday(weekday: number): string {
   const d = startOfDay(new Date());
   const diff = (weekday - d.getDay() + 7) % 7;
@@ -24,9 +23,7 @@ export function isoDateForNextWeekday(weekday: number): string {
   return d.toISOString().slice(0, 10);
 }
 
-/** Renders a due date the way a student would say it: Today, Tomorrow,
- * Friday, or an absolute "Sep 18" once it's far enough out. */
-export function relativeDueLabel(isoDate: string): string {
+export function relativeDueLabel(isoDate: string, completed = false): string {
   const today = startOfDay(new Date());
   const due = startOfDay(new Date(isoDate + "T00:00:00"));
   const diffDays = Math.round((due.getTime() - today.getTime()) / DAY_MS);
@@ -34,7 +31,12 @@ export function relativeDueLabel(isoDate: string): string {
   if (diffDays === 0) return "Today";
   if (diffDays === 1) return "Tomorrow";
   if (diffDays === -1) return "Yesterday";
-  if (diffDays < 0) return `${Math.abs(diffDays)} days overdue`;
+  if (diffDays < 0) {
+    if (completed) {
+      return due.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+    }
+    return `${Math.abs(diffDays)} days overdue`;
+  }
   if (diffDays > 1 && diffDays < 7) {
     return due.toLocaleDateString("en-US", { weekday: "long" });
   }
