@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
+import { createPortal } from "react-dom";
 import { toggleAssignmentComplete, deleteAssignment } from "@/lib/actions/assignments";
 import { relativeDueLabel } from "@/lib/dates";
 import { ColorDot } from "@/components/ui";
@@ -31,8 +32,18 @@ export function AssignmentCard({
   editableClasses: { id: string; name: string; accent_color: string }[];
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [menuPos, setMenuPos] = useState<{ top: number; left: number } | null>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
   const [pending, startTransition] = useTransition();
   const [completed, setCompleted] = useState(assignment.completed);
+
+  function openMenu() {
+    const rect = menuButtonRef.current?.getBoundingClientRect();
+    if (rect) {
+      setMenuPos({ top: rect.bottom + 4, left: Math.max(8, rect.right - 160) });
+    }
+    setMenuOpen(true);
+  }
 
   function handleToggle() {
     const next = !completed;
@@ -58,6 +69,54 @@ export function AssignmentCard({
   }
 
   const overdue = !completed && relativeDueLabel(assignment.due_date, completed).includes("overdue");
+
+  const menuContent = menuOpen && menuPos && (
+    <>
+      <div className="fixed inset-0 z-[90]" onClick={() => setMenuOpen(false)} />
+      <div
+        style={{ position: "fixed", top: menuPos.top, left: menuPos.left }}
+        className="w-40 rounded-xl border border-hairline bg-paper shadow-sm z-[91] overflow-hidden"
+      >
+        <AddHomeworkModal
+          classes={editableClasses}
+          lockedClassId={assignment.class_id}
+          existing={{
+            id: assignment.id,
+            class_id: assignment.class_id,
+            title: assignment.title,
+            description: assignment.description,
+            due_date: assignment.due_date,
+          }}
+          trigger={(openModal) => (
+            <button
+              className="w-full text-left px-4 py-2.5 text-sm hover:bg-wash"
+              onClick={() => {
+                setMenuOpen(false);
+                openModal();
+              }}
+            >
+              Edit
+            </button>
+          )}
+        />
+        <button
+          className="w-full text-left px-4 py-2.5 text-sm hover:bg-wash"
+          onClick={() => {
+            setMenuOpen(false);
+            handleToggle();
+          }}
+        >
+          {completed ? "Mark incomplete" : "Mark complete"}
+        </button>
+        <button
+          className="w-full text-left px-4 py-2.5 text-sm hover:bg-wash text-danger"
+          onClick={handleDelete}
+        >
+          Delete
+        </button>
+      </div>
+    </>
+  );
 
   return (
     <div className="card flex items-start gap-3 animate-fade-in">
@@ -105,56 +164,14 @@ export function AssignmentCard({
 
       <div className="relative">
         <button
-          onClick={() => setMenuOpen((v) => !v)}
+          ref={menuButtonRef}
+          onClick={() => (menuOpen ? setMenuOpen(false) : openMenu())}
           className="text-faint hover:text-ink px-1 py-1 rounded"
           aria-label="Assignment options"
         >
           •••
         </button>
-        {menuOpen && (
-          <>
-            <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
-            <div className="absolute right-0 mt-1 w-40 rounded-xl border border-hairline bg-paper shadow-sm z-20 overflow-hidden">
-              <AddHomeworkModal
-                classes={editableClasses}
-                lockedClassId={assignment.class_id}
-                existing={{
-                  id: assignment.id,
-                  class_id: assignment.class_id,
-                  title: assignment.title,
-                  description: assignment.description,
-                  due_date: assignment.due_date,
-                }}
-                trigger={(openModal) => (
-                  <button
-                    className="w-full text-left px-4 py-2.5 text-sm hover:bg-wash"
-                    onClick={() => {
-                      setMenuOpen(false);
-                      openModal();
-                    }}
-                  >
-                    Edit
-                  </button>
-                )}
-              />
-              <button
-                className="w-full text-left px-4 py-2.5 text-sm hover:bg-wash"
-                onClick={() => {
-                  setMenuOpen(false);
-                  handleToggle();
-                }}
-              >
-                {completed ? "Mark incomplete" : "Mark complete"}
-              </button>
-              <button
-                className="w-full text-left px-4 py-2.5 text-sm hover:bg-wash text-danger"
-                onClick={handleDelete}
-              >
-                Delete
-              </button>
-            </div>
-          </>
-        )}
+        {typeof document !== "undefined" && createPortal(menuContent, document.body)}
       </div>
     </div>
   );
