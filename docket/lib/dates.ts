@@ -57,6 +57,13 @@ export function bucketForDate(isoDate: string): DueBucket {
   return "later";
 }
 
+export function nextOccurrenceOfWeekday(weekday: number, fromISODate: string): string {
+  const d = startOfDay(new Date(fromISODate + "T00:00:00"));
+  const diff = (weekday - d.getDay() + 7) % 7;
+  d.setDate(d.getDate() + diff);
+  return d.toISOString().slice(0, 10);
+}
+
 export const BUCKET_LABELS: Record<DueBucket, string> = {
   overdue: "Overdue",
   today: "Today",

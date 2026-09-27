@@ -15,7 +15,7 @@ export type AssignmentData = {
   due_date: string;
   completed: boolean;
   created_by_name: string;
-  recurrence?: string | null;
+  recurrence_interval_weeks?: number | null;
 };
 
 export function AssignmentCard({
@@ -140,9 +140,14 @@ export function AssignmentCard({
           <span className={`font-serif text-sm ${overdue ? "text-danger" : "text-muted"}`}>
             {relativeDueLabel(assignment.due_date, completed)}
           </span>
-          {assignment.recurrence === "weekly" && (
+          {assignment.recurrence_interval_weeks === 1 && (
             <span className="text-xs text-faint" title="Repeats weekly">
               ↻ Weekly
+            </span>
+          )}
+          {assignment.recurrence_interval_weeks != null && assignment.recurrence_interval_weeks > 1 && (
+            <span className="text-xs text-faint" title={`Repeats every ${assignment.recurrence_interval_weeks} weeks`}>
+              ↻ Every {assignment.recurrence_interval_weeks} weeks
             </span>
           )}
           <span className="text-faint text-xs">·</span>

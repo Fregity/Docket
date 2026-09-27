@@ -22,6 +22,12 @@ const QUICK_DUES = [
   { label: "Friday", value: () => isoDateForNextWeekday(5) },
 ];
 
+const DAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
+
+function weekdayOf(iso: string): number {
+  return new Date(iso + "T00:00:00").getDay();
+}
+
 export function AddHomeworkModal({
   classes,
   lockedClassId,
@@ -48,7 +54,22 @@ export function AddHomeworkModal({
   const [description, setDescription] = useState(existing?.description ?? "");
   const [dueDate, setDueDate] = useState(existing?.due_date ?? isoDateFromOffset(1));
   const [customDate, setCustomDate] = useState(false);
-  const [recurring, setRecurring] = useState(false);
+  const [showRecurrence, setShowRecurrence] = useState(false);
+  const [recurringDays, setRecurringDays] = useState<number[]>([]);
+  const [intervalWeeks, setIntervalWeeks] = useState(1);
+
+  function toggleRecurrence(checked: boolean) {
+    setShowRecurrence(checked);
+    if (checked && recurringDays.length === 0) {
+      setRecurringDays([weekdayOf(dueDate)]);
+    }
+  }
+
+  function toggleDay(day: number) {
+    setRecurringDays((prev) =>
+      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day].sort()
+    );
+  }
 
   function close() {
     setOpen(false);
@@ -58,6 +79,10 @@ export function AddHomeworkModal({
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!title.trim() || !classId) return;
+    if (showRecurrence && recurringDays.length === 0) {
+      setError("Pick at least one day it repeats on.");
+      return;
+    }
     setError(null);
 
     startTransition(async () => {
@@ -71,13 +96,22 @@ export function AddHomeworkModal({
             dueDate,
           });
         } else {
-          await addAssignment({ classId, title, description, dueDate, recurring });
+          await addAssignment({
+            classId,
+            title,
+            description,
+            dueDate,
+            recurringDays: showRecurrence ? recurringDays : undefined,
+            recurringIntervalWeeks: intervalWeeks,
+          });
         }
         setOpen(false);
         setTitle("");
         setDescription("");
         setCustomDate(false);
-        setRecurring(false);
+        setShowRecurrence(false);
+        setRecurringDays([]);
+        setIntervalWeeks(1);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Something went wrong.");
       }
@@ -186,15 +220,65 @@ export function AddHomeworkModal({
         </div>
 
         {!existing && (
-          <label className="flex items-center gap-2.5 mb-6 text-[15px] text-ink cursor-pointer select-none">
-            <input
-              type="checkbox"
-              checked={recurring}
-              onChange={(e) => setRecurring(e.target.checked)}
-              className="w-4 h-4 rounded border-hairline accent-ink"
-            />
-            Repeats weekly
-          </label>
+          <div className="mb-6">
+            <label className="flex items-center gap-2.5 mb-3 text-[15px] text-ink cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={showRecurrence}
+                onChange={(e) => toggleRecurrence(e.target.checked)}
+                className="w-4 h-4 rounded border-hairline accent-ink"
+              />
+              Repeats
+            </label>
+
+            {showRecurrence && (
+              <div className="pl-0.5">
+                <label className="label">Repeats on</label>
+                <div className="flex gap-1.5 mb-4">
+                  {DAY_LABELS.map((label, day) => (
+                    <button
+                      key={day}
+                      type="button"
+                      onClick={() => toggleDay(day)}
+                      className={`w-8 h-8 rounded-full text-xs font-medium transition-colors ${
+                        recurringDays.includes(day)
+                          ? "bg-ink text-paper"
+                          : "border border-hairline text-muted hover:bg-wash"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+
+                <label className="label">Every</label>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIntervalWeeks(1)}
+                    className={`rounded-xl px-4 py-2 text-sm border transition-colors ${
+                      intervalWeeks === 1
+                        ? "bg-ink text-paper border-ink"
+                        : "border-hairline text-ink hover:bg-wash"
+                    }`}
+                  >
+                    Week
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIntervalWeeks(2)}
+                    className={`rounded-xl px-4 py-2 text-sm border transition-colors ${
+                      intervalWeeks === 2
+                        ? "bg-ink text-paper border-ink"
+                        : "border-hairline text-ink hover:bg-wash"
+                    }`}
+                  >
+                    2 weeks
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         )}
 
         {error && <p className="text-sm mb-4 text-danger">{error}</p>}

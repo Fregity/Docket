@@ -2,13 +2,15 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { nextOccurrenceOfWeekday } from "@/lib/dates";
 
 export async function addAssignment(input: {
   classId: string;
   title: string;
   description?: string;
   dueDate: string;
-  recurring?: boolean;
+  recurringDays?: number[];
+  recurringIntervalWeeks?: number;
 }) {
   const supabase = await createClient();
   const {
@@ -16,14 +18,31 @@ export async function addAssignment(input: {
   } = await supabase.auth.getUser();
   if (!user) throw new Error("not_authenticated");
 
-  const { error } = await supabase.from("assignments").insert({
-    class_id: input.classId,
-    title: input.title.trim(),
-    description: input.description?.trim() || null,
-    due_date: input.dueDate,
-    recurrence: input.recurring ? "weekly" : null,
-    created_by: user.id,
-  });
+  const title = input.title.trim();
+  const description = input.description?.trim() || null;
+
+  const rows =
+    input.recurringDays && input.recurringDays.length > 0
+      ? input.recurringDays.map((day) => ({
+          class_id: input.classId,
+          title,
+          description,
+          due_date: nextOccurrenceOfWeekday(day, input.dueDate),
+          recurrence_interval_weeks: input.recurringIntervalWeeks ?? 1,
+          created_by: user.id,
+        }))
+      : [
+          {
+            class_id: input.classId,
+            title,
+            description,
+            due_date: input.dueDate,
+            recurrence_interval_weeks: null,
+            created_by: user.id,
+          },
+        ];
+
+  const { error } = await supabase.from("assignments").insert(rows);
 
   if (error) throw new Error("Couldn't save that assignment. Try again.");
 
