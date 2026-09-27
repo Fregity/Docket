@@ -27,13 +27,19 @@ export function AddHomeworkModal({
   lockedClassId,
   existing,
   trigger,
+  open: controlledOpen,
+  onOpenChange,
 }: {
   classes: ClassOption[];
   lockedClassId?: string;
   existing?: ExistingAssignment;
   trigger?: (open: () => void) => React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = onOpenChange ?? setInternalOpen;
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -207,13 +213,13 @@ export function AddHomeworkModal({
 
   return (
     <>
-      {trigger ? (
-        trigger(() => setOpen(true))
-      ) : (
-        <button className="btn-primary" onClick={() => setOpen(true)}>
-          + Add homework
-        </button>
-      )}
+      {trigger
+        ? trigger(() => setOpen(true))
+        : controlledOpen === undefined && (
+            <button className="btn-primary" onClick={() => setOpen(true)}>
+              + Add homework
+            </button>
+          )}
 
       {open && typeof document !== "undefined" && createPortal(modalContent, document.body)}
     </>

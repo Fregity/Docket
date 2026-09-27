@@ -36,6 +36,7 @@ export function AssignmentCard({
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const [pending, startTransition] = useTransition();
   const [completed, setCompleted] = useState(assignment.completed);
+  const [editOpen, setEditOpen] = useState(false);
 
   function openMenu() {
     const rect = menuButtonRef.current?.getBoundingClientRect();
@@ -77,28 +78,15 @@ export function AssignmentCard({
         style={{ position: "fixed", top: menuPos.top, left: menuPos.left }}
         className="w-40 rounded-xl border border-hairline bg-paper shadow-sm z-[91] overflow-hidden"
       >
-        <AddHomeworkModal
-          classes={editableClasses}
-          lockedClassId={assignment.class_id}
-          existing={{
-            id: assignment.id,
-            class_id: assignment.class_id,
-            title: assignment.title,
-            description: assignment.description,
-            due_date: assignment.due_date,
+        <button
+          className="w-full text-left px-4 py-2.5 text-sm hover:bg-wash"
+          onClick={() => {
+            setMenuOpen(false);
+            setEditOpen(true);
           }}
-          trigger={(openModal) => (
-            <button
-              className="w-full text-left px-4 py-2.5 text-sm hover:bg-wash"
-              onClick={() => {
-                setMenuOpen(false);
-                openModal();
-              }}
-            >
-              Edit
-            </button>
-          )}
-        />
+        >
+          Edit
+        </button>
         <button
           className="w-full text-left px-4 py-2.5 text-sm hover:bg-wash"
           onClick={() => {
@@ -173,6 +161,20 @@ export function AssignmentCard({
         </button>
         {typeof document !== "undefined" && createPortal(menuContent, document.body)}
       </div>
+
+      <AddHomeworkModal
+        classes={editableClasses}
+        lockedClassId={assignment.class_id}
+        existing={{
+          id: assignment.id,
+          class_id: assignment.class_id,
+          title: assignment.title,
+          description: assignment.description,
+          due_date: assignment.due_date,
+        }}
+        open={editOpen}
+        onOpenChange={setEditOpen}
+      />
     </div>
   );
 }
