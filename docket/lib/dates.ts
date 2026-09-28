@@ -53,7 +53,7 @@ export function bucketForDate(isoDate: string): DueBucket {
   if (diffDays < 0) return "overdue";
   if (diffDays === 0) return "today";
   if (diffDays === 1) return "tomorrow";
-  if (diffDays <= 7) return "week";
+  if (diffDays <= 6) return "week";
   return "later";
 }
 
