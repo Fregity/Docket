@@ -4,6 +4,15 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { nextOccurrenceOfWeekday } from "@/lib/dates";
 
+type AssignmentInsert = {
+  class_id: string;
+  title: string;
+  description: string | null;
+  due_date: string;
+  recurrence_interval_weeks: number | null;
+  created_by: string;
+};
+
 export async function addAssignment(input: {
   classId: string;
   title: string;
@@ -21,7 +30,7 @@ export async function addAssignment(input: {
   const title = input.title.trim();
   const description = input.description?.trim() || null;
 
-  const rows =
+    const rows: AssignmentInsert[] =
     input.recurringDays && input.recurringDays.length > 0
       ? input.recurringDays.map((day) => ({
           class_id: input.classId,
