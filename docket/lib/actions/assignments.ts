@@ -65,10 +65,14 @@ export async function updateAssignment(input: {
   title: string;
   description?: string;
   dueDate: string;
+  /** undefined = leave repeating alone; null = stop repeating; a number =
+   * repeat every that-many weeks. Applied to the whole series this
+   * assignment belongs to, so it changes what gets created next. */
+  recurrenceIntervalWeeks?: number | null;
 }) {
   const supabase = await createClient();
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("assignments")
     .update({
       title: input.title.trim(),
@@ -76,9 +80,20 @@ export async function updateAssignment(input: {
       due_date: input.dueDate,
       updated_at: new Date().toISOString(),
     })
-    .eq("id", input.id);
+    .eq("id", input.id)
+    .select("series_id")
+    .single();
 
-  if (error) throw new Error("Couldn't save that change. Try again.");
+  const updated = data as { series_id: string } | null;
+  if (error || !updated) throw new Error("Couldn't save that change. Try again.");
+
+  if (input.recurrenceIntervalWeeks !== undefined) {
+    const { error: seriesError } = await supabase
+      .from("assignments")
+      .update({ recurrence_interval_weeks: input.recurrenceIntervalWeeks })
+      .eq("series_id", updated.series_id);
+    if (seriesError) throw new Error("Couldn't save that change. Try again.");
+  }
 
   revalidatePath("/dashboard");
   revalidatePath(`/classes/${input.classId}`);

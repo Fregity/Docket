@@ -176,6 +176,7 @@ export function AssignmentCard({
           title: assignment.title,
           description: assignment.description,
           due_date: assignment.due_date,
+          recurrence_interval_weeks: assignment.recurrence_interval_weeks ?? null,
         }}
         open={editOpen}
         onOpenChange={setEditOpen}
