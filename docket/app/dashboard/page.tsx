@@ -40,7 +40,7 @@ export default async function DashboardPage() {
   if (classIds.length > 0) {
     const { data } = await supabase
       .from("assignments_with_completion")
-      .select("id, class_id, title, description, due_date, completed_for_me, recurrence_interval_weeks, classes(name, accent_color), profiles(display_name)")
+      .select("id, class_id, title, description, due_date, completed_for_me, recurrence_interval_weeks, recurrence_monthly, classes(name, accent_color), profiles(display_name)")
       .in("class_id", classIds)
       .eq("completed_for_me", false)
       .order("due_date", { ascending: true });
@@ -53,6 +53,7 @@ export default async function DashboardPage() {
       due_date: a.due_date,
       completed: a.completed_for_me,
       recurrence_interval_weeks: a.recurrence_interval_weeks,
+      recurrence_monthly: a.recurrence_monthly,
       created_by_name: a.profiles?.display_name ?? "Someone",
       className: a.classes?.name ?? "",
       accentColor: a.classes?.accent_color ?? "olive",
