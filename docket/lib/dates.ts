@@ -38,43 +38,5 @@ export function relativeDueLabel(isoDate: string, completed = false): string {
     return `${Math.abs(diffDays)} days overdue`;
   }
   if (diffDays > 1 && diffDays < 7) {
-    return due.toLocaleDateString("en-US", { weekday: "long" });
-  }
-  return due.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-}
-
-export type DueBucket = "overdue" | "today" | "tomorrow" | "week" | "later";
-
-export function bucketForDate(isoDate: string): DueBucket {
-  const today = startOfDay(new Date());
-  const due = startOfDay(new Date(isoDate + "T00:00:00"));
-  const diffDays = Math.round((due.getTime() - today.getTime()) / DAY_MS);
-
-  if (diffDays < 0) return "overdue";
-  if (diffDays === 0) return "today";
-  if (diffDays === 1) return "tomorrow";
-  if (diffDays <= 6) return "week";
-  return "later";
-}
-
-export function nextOccurrenceOfWeekday(weekday: number, fromISODate: string): string {
-  const d = startOfDay(new Date(fromISODate + "T00:00:00"));
-  const diff = (weekday - d.getDay() + 7) % 7;
-  d.setDate(d.getDate() + diff);
-  return d.toISOString().slice(0, 10);
-}
-
-export const BUCKET_LABELS: Record<DueBucket, string> = {
-  overdue: "Overdue",
-  today: "Today",
-  tomorrow: "Tomorrow",
-  week: "This week",
-  later: "Later",
-};
-
-export function formatWhen(isoTimestamp: string): string {
-  return new Date(isoTimestamp).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-  });
-}
+    const weekday = due.toLocaleDateString("en-US", { weekday: "long" });
+    const daysLeftInWeek = 6 - ((today.getDay() + 6) % 7
