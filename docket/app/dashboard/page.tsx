@@ -59,7 +59,7 @@ export default async function DashboardPage() {
     }));
   }
 
-  const buckets: DueBucket[] = ["overdue", "today", "tomorrow", "week", "later"];
+  const buckets: DueBucket[] = ["overdue", "today", "tomorrow", "week", "nextweek", "later"];
   const grouped = buckets.map((b) => ({
     bucket: b,
     items: assignments.filter((a) => bucketForDate(a.due_date) === b),
