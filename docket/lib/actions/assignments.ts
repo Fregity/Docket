@@ -10,6 +10,7 @@ type AssignmentInsert = {
   description: string | null;
   due_date: string;
   recurrence_interval_weeks: number | null;
+  recurrence_monthly: boolean;
   created_by: string;
 };
 
@@ -20,6 +21,7 @@ export async function addAssignment(input: {
   dueDate: string;
   recurringDays?: number[];
   recurringIntervalWeeks?: number;
+  recurringMonthly?: boolean;
 }) {
   const supabase = await createClient();
   const {
@@ -30,26 +32,43 @@ export async function addAssignment(input: {
   const title = input.title.trim();
   const description = input.description?.trim() || null;
 
-    const rows: AssignmentInsert[] =
-    input.recurringDays && input.recurringDays.length > 0
-      ? input.recurringDays.map((day) => ({
-          class_id: input.classId,
-          title,
-          description,
-          due_date: nextOccurrenceOfWeekday(day, input.dueDate),
-          recurrence_interval_weeks: input.recurringIntervalWeeks ?? 1,
-          created_by: user.id,
-        }))
-      : [
-          {
-            class_id: input.classId,
-            title,
-            description,
-            due_date: input.dueDate,
-            recurrence_interval_weeks: null,
-            created_by: user.id,
-          },
-        ];
+  let rows: AssignmentInsert[];
+
+  if (input.recurringMonthly) {
+    rows = [
+      {
+        class_id: input.classId,
+        title,
+        description,
+        due_date: input.dueDate,
+        recurrence_interval_weeks: null,
+        recurrence_monthly: true,
+        created_by: user.id,
+      },
+    ];
+  } else if (input.recurringDays && input.recurringDays.length > 0) {
+    rows = input.recurringDays.map((day) => ({
+      class_id: input.classId,
+      title,
+      description,
+      due_date: nextOccurrenceOfWeekday(day, input.dueDate),
+      recurrence_interval_weeks: input.recurringIntervalWeeks ?? 1,
+      recurrence_monthly: false,
+      created_by: user.id,
+    }));
+  } else {
+    rows = [
+      {
+        class_id: input.classId,
+        title,
+        description,
+        due_date: input.dueDate,
+        recurrence_interval_weeks: null,
+        recurrence_monthly: false,
+        created_by: user.id,
+      },
+    ];
+  }
 
   const { error } = await supabase.from("assignments").insert(rows);
 
@@ -65,10 +84,13 @@ export async function updateAssignment(input: {
   title: string;
   description?: string;
   dueDate: string;
-  /** undefined = leave repeating alone; null = stop repeating; a number =
-   * repeat every that-many weeks. Applied to the whole series this
-   * assignment belongs to, so it changes what gets created next. */
+  /** Only sent when the person changed the repeat settings. Both are
+   * applied to the whole series this assignment belongs to, so they change
+   * what gets created next. recurrenceMonthly: true means monthly (and the
+   * weekly interval is cleared); recurrenceIntervalWeeks: a number means
+   * weekly; null with monthly false means stop repeating. */
   recurrenceIntervalWeeks?: number | null;
+  recurrenceMonthly?: boolean;
 }) {
   const supabase = await createClient();
 
@@ -87,10 +109,14 @@ export async function updateAssignment(input: {
   const updated = data as { series_id: string } | null;
   if (error || !updated) throw new Error("Couldn't save that change. Try again.");
 
-  if (input.recurrenceIntervalWeeks !== undefined) {
+  if (input.recurrenceIntervalWeeks !== undefined || input.recurrenceMonthly !== undefined) {
+    const monthly = input.recurrenceMonthly === true;
     const { error: seriesError } = await supabase
       .from("assignments")
-      .update({ recurrence_interval_weeks: input.recurrenceIntervalWeeks })
+      .update({
+        recurrence_interval_weeks: monthly ? null : input.recurrenceIntervalWeeks ?? null,
+        recurrence_monthly: monthly,
+      })
       .eq("series_id", updated.series_id);
     if (seriesError) throw new Error("Couldn't save that change. Try again.");
   }
