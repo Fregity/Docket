@@ -16,6 +16,7 @@ export type AssignmentData = {
   completed: boolean;
   created_by_name: string;
   recurrence_interval_weeks?: number | null;
+  recurrence_monthly?: boolean;
 };
 
 export function AssignmentCard({
@@ -140,16 +141,23 @@ export function AssignmentCard({
           <span className={`font-serif text-sm ${overdue ? "text-danger" : "text-muted"}`}>
             {relativeDueLabel(assignment.due_date, completed)}
           </span>
-          {assignment.recurrence_interval_weeks === 1 && (
+          {assignment.recurrence_monthly && (
+            <span className="text-xs text-faint" title="Repeats monthly">
+              ↻ Monthly
+            </span>
+          )}
+          {!assignment.recurrence_monthly && assignment.recurrence_interval_weeks === 1 && (
             <span className="text-xs text-faint" title="Repeats weekly">
               ↻ Weekly
             </span>
           )}
-          {assignment.recurrence_interval_weeks != null && assignment.recurrence_interval_weeks > 1 && (
-            <span className="text-xs text-faint" title={`Repeats every ${assignment.recurrence_interval_weeks} weeks`}>
-              ↻ Every {assignment.recurrence_interval_weeks} weeks
-            </span>
-          )}
+          {!assignment.recurrence_monthly &&
+            assignment.recurrence_interval_weeks != null &&
+            assignment.recurrence_interval_weeks > 1 && (
+              <span className="text-xs text-faint" title={`Repeats every ${assignment.recurrence_interval_weeks} weeks`}>
+                ↻ Every {assignment.recurrence_interval_weeks} weeks
+              </span>
+            )}
           <span className="text-faint text-xs">·</span>
           <span className="text-xs text-faint">Added by {assignment.created_by_name}</span>
         </div>
@@ -177,6 +185,7 @@ export function AssignmentCard({
           description: assignment.description,
           due_date: assignment.due_date,
           recurrence_interval_weeks: assignment.recurrence_interval_weeks ?? null,
+          recurrence_monthly: assignment.recurrence_monthly ?? false,
         }}
         open={editOpen}
         onOpenChange={setEditOpen}
