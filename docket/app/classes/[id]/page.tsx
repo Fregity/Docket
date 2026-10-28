@@ -42,7 +42,7 @@ export default async function ClassDetailPage({
 
   const { data: assignmentRows } = await supabase
     .from("assignments_with_completion")
-    .select("id, class_id, title, description, due_date, completed_for_me, recurrence_interval_weeks, created_at, profiles(display_name)")
+    .select("id, class_id, title, description, due_date, completed_for_me, recurrence_interval_weeks, recurrence_monthly, created_at, profiles(display_name)")
     .eq("class_id", id)
     .order("due_date", { ascending: true });
 
@@ -54,6 +54,7 @@ export default async function ClassDetailPage({
     due_date: a.due_date,
     completed: a.completed_for_me,
     recurrence_interval_weeks: a.recurrence_interval_weeks,
+    recurrence_monthly: a.recurrence_monthly,
     created_at: a.created_at,
     created_by_name: a.profiles?.display_name ?? "Someone",
   }));
