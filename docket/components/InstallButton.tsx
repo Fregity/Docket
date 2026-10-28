@@ -62,10 +62,9 @@ export default function InstallButton() {
       <button
         type="button"
         onClick={handleClick}
-        className="flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-left text-white shadow-lg shadow-blue-500/25 transition active:scale-[0.98]"
-        style={{ background: "linear-gradient(135deg, #3b82f6 0%, #2563eb 55%, #4f46e5 100%)" }}
+        className="flex w-full items-center gap-3 rounded-2xl border border-ink/10 bg-ink/5 px-4 py-3.5 text-left text-ink transition hover:bg-ink/10 active:scale-[0.98]"
       >
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/20">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-ink/10">
           <svg
             width="22"
             height="22"
@@ -86,14 +85,14 @@ export default function InstallButton() {
           <span className="block text-[15px] font-semibold leading-tight">
             Add to home screen
           </span>
-          <span className="block text-xs text-white/80">
+          <span className="block text-xs text-ink/60">
             Open DueBird like a real app
           </span>
         </span>
       </button>
 
       {showHelp && (
-        <div className="mt-3 rounded-2xl border border-black/10 bg-black/5 p-4 text-sm dark:border-white/10 dark:bg-white/5">
+        <div className="mt-3 rounded-2xl border border-ink/10 p-4 text-sm text-ink/80">
           {isIos ? (
             <ol className="list-decimal space-y-1.5 pl-5">
               <li>Tap the Share button in Safari.</li>
