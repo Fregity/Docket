@@ -15,7 +15,10 @@ type ExistingAssignment = {
   description: string | null;
   due_date: string;
   recurrence_interval_weeks?: number | null;
+  recurrence_monthly?: boolean;
 };
+
+type RepeatEvery = 1 | 2 | "month";
 
 const QUICK_DUES = [
   { label: "Today", value: () => isoDateFromOffset(0) },
@@ -25,10 +28,13 @@ const QUICK_DUES = [
 
 const DAY_LABELS = ["S", "M", "T", "W", "T", "F", "S"];
 
-const INTERVAL_OPTIONS = [
-  { weeks: 1, label: "Week" },
-  { weeks: 2, label: "2 weeks" },
+const INTERVAL_OPTIONS: { value: RepeatEvery; label: string }[] = [
+  { value: 1, label: "Week" },
+  { value: 2, label: "2 weeks" },
+  { value: "month", label: "Month" },
 ];
+
+const ORDINALS = ["first", "second", "third", "fourth", "last"];
 
 function weekdayOf(iso: string): number {
   return new Date(iso + "T00:00:00").getDay();
@@ -36,6 +42,18 @@ function weekdayOf(iso: string): number {
 
 function isQuickDue(iso: string): boolean {
   return QUICK_DUES.some((q) => q.value() === iso);
+}
+
+function repeatEveryOf(e?: ExistingAssignment): RepeatEvery {
+  if (e?.recurrence_monthly) return "month";
+  return e?.recurrence_interval_weeks === 2 ? 2 : 1;
+}
+
+function monthlyPhrase(iso: string): string {
+  const d = new Date(iso + "T00:00:00");
+  const n = Math.min(Math.ceil(d.getDate() / 7), 5);
+  const weekday = d.toLocaleDateString("en-US", { weekday: "long" });
+  return `${ORDINALS[n - 1]} ${weekday}`;
 }
 
 export function AddHomeworkModal({
@@ -64,9 +82,12 @@ export function AddHomeworkModal({
   const [description, setDescription] = useState(existing?.description ?? "");
   const [dueDate, setDueDate] = useState(existing?.due_date ?? isoDateFromOffset(1));
   const [customDate, setCustomDate] = useState(existing ? !isQuickDue(existing.due_date) : false);
-  const [showRecurrence, setShowRecurrence] = useState(existing?.recurrence_interval_weeks != null);
+  const [showRecurrence, setShowRecurrence] = useState(
+    existing?.recurrence_interval_weeks != null || existing?.recurrence_monthly === true
+  );
   const [recurringDays, setRecurringDays] = useState<number[]>([]);
-  const [intervalWeeks, setIntervalWeeks] = useState(existing?.recurrence_interval_weeks ?? 1);
+  const [repeatEvery, setRepeatEvery] = useState<RepeatEvery>(repeatEveryOf(existing));
+  const [repeatChanged, setRepeatChanged] = useState(false);
 
   // The edit modal stays mounted between uses (so it survives its dropdown
   // closing), which means its fields would otherwise keep whatever was last
@@ -79,8 +100,9 @@ export function AddHomeworkModal({
     setDescription(existing.description ?? "");
     setDueDate(existing.due_date);
     setCustomDate(!isQuickDue(existing.due_date));
-    setShowRecurrence(existing.recurrence_interval_weeks != null);
-    setIntervalWeeks(existing.recurrence_interval_weeks ?? 1);
+    setShowRecurrence(existing.recurrence_interval_weeks != null || existing.recurrence_monthly === true);
+    setRepeatEvery(repeatEveryOf(existing));
+    setRepeatChanged(false);
     setError(null);
   }, [open]);
 
@@ -90,6 +112,7 @@ export function AddHomeworkModal({
 
   function toggleRecurrence(checked: boolean) {
     setShowRecurrence(checked);
+    setRepeatChanged(true);
     if (checked && !existing && recurringDays.length === 0) {
       setRecurringDays([weekdayOf(dueDate)]);
     }
@@ -109,7 +132,7 @@ export function AddHomeworkModal({
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!title.trim() || !classId) return;
-    if (showRecurrence && !existing && recurringDays.length === 0) {
+    if (showRecurrence && !existing && repeatEvery !== "month" && recurringDays.length === 0) {
       setError("Pick at least one day it repeats on.");
       return;
     }
@@ -124,7 +147,13 @@ export function AddHomeworkModal({
             title,
             description,
             dueDate,
-            recurrenceIntervalWeeks: showRecurrence ? intervalWeeks : null,
+            ...(repeatChanged
+              ? {
+                  recurrenceIntervalWeeks:
+                    showRecurrence && repeatEvery !== "month" ? repeatEvery : null,
+                  recurrenceMonthly: showRecurrence && repeatEvery === "month",
+                }
+              : {}),
           });
         } else {
           await addAssignment({
@@ -132,8 +161,10 @@ export function AddHomeworkModal({
             title,
             description,
             dueDate,
-            recurringDays: showRecurrence ? recurringDays : undefined,
-            recurringIntervalWeeks: intervalWeeks,
+            recurringDays:
+              showRecurrence && repeatEvery !== "month" ? recurringDays : undefined,
+            recurringIntervalWeeks: repeatEvery === "month" ? 1 : repeatEvery,
+            recurringMonthly: showRecurrence && repeatEvery === "month",
           });
         }
         setOpen(false);
@@ -143,7 +174,7 @@ export function AddHomeworkModal({
           setCustomDate(false);
           setShowRecurrence(false);
           setRecurringDays([]);
-          setIntervalWeeks(1);
+          setRepeatEvery(1);
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : "Something went wrong.");
@@ -265,7 +296,13 @@ export function AddHomeworkModal({
 
           {showRecurrence && (
             <div className="pl-0.5">
-              {existing ? (
+              {repeatEvery === "month" ? (
+                dueDate && (
+                  <p className="text-sm text-muted mb-4">
+                    Repeats on the {monthlyPhrase(dueDate)} of each month
+                  </p>
+                )
+              ) : existing ? (
                 weekdayName && (
                   <p className="text-sm text-muted mb-4">Repeats on {weekdayName}s</p>
                 )
@@ -295,11 +332,14 @@ export function AddHomeworkModal({
               <div className="flex gap-2">
                 {INTERVAL_OPTIONS.map((opt) => (
                   <button
-                    key={opt.weeks}
+                    key={String(opt.value)}
                     type="button"
-                    onClick={() => setIntervalWeeks(opt.weeks)}
+                    onClick={() => {
+                      setRepeatEvery(opt.value);
+                      setRepeatChanged(true);
+                    }}
                     className={`rounded-xl px-4 py-2 text-sm border transition-colors ${
-                      intervalWeeks === opt.weeks
+                      repeatEvery === opt.value
                         ? "bg-ink text-paper border-ink"
                         : "border-hairline text-ink hover:bg-wash"
                     }`}
@@ -343,4 +383,4 @@ export function AddHomeworkModal({
 
 export function ClassOptionDot({ colorId }: { colorId: string }) {
   return <ColorDot colorId={colorId} />;
-}
+    }
