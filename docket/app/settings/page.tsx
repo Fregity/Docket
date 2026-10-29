@@ -15,7 +15,7 @@ export default async function SettingsPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("display_name, email")
+    .select("display_name")
     .eq("id", user.id)
     .single();
 
@@ -49,7 +49,7 @@ export default async function SettingsPage() {
 
         <div>
           <label className="label">Email</label>
-          <p className="text-[15px] text-ink">{profile?.email}</p>
+          <p className="text-[15px] text-ink">{user.email}</p>
         </div>
 
         <ThemeToggle />
