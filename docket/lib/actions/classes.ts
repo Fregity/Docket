@@ -33,9 +33,12 @@ export async function joinClassByCode(code: string) {
   const { data, error } = await supabase.rpc("join_class_by_code", {
     p_code: code.trim(),
   });
-  const joinedClass = data as { id: string } | null;
+  const joinedClass = data as { id: string | null } | null;
 
-  if (error || !joinedClass) {
+  if (error?.message.includes("too_many_attempts")) {
+    throw new Error("Too many tries. Wait a little while and try again.");
+  }
+  if (error || !joinedClass?.id) {
     throw new Error("This invite link isn't valid.");
   }
 
