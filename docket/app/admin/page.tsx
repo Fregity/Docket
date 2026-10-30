@@ -16,6 +16,8 @@ export default async function AdminPage() {
   // 2. Handle authentication and authorization
   const { data: { user } } = await supabase.auth.getUser();
 
+  console.log("Admin authenticated email:", user?.email);
+  
   const allowlist = (process.env.ADMIN_EMAILS ?? "")
     .split(",")
     .map((e) => e.trim().toLowerCase())
