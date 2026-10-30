@@ -39,11 +39,13 @@ export default async function AdminPage() {
   if (error) {
     console.error("admin_counts RPC error:", error);
   }
-  
+
+  const result = data as AdminStats | null;
+
   const stats = [
-    { label: "Total users", value: data?.total_users ?? 0 },
-    { label: "Total classes", value: data?.total_classes ?? 0 },
-    { label: "Total assignments", value: data?.total_assignments ?? 0 },
+    { label: "Total users", value: result?.total_users ?? 0 },
+    { label: "Total classes", value: result?.total_classes ?? 0 },
+    { label: "Total assignments", value: result?.total_assignments ?? 0 },
   ];
 
   return (
