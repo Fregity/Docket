@@ -73,6 +73,13 @@ export async function addAssignment(input: {
   const { error } = await supabase.from("assignments").insert(rows);
 
   if (error) throw new Error("Couldn't save that assignment. Try again.");
+  const { error: analyticsError } = await supabase
+  .from("analytics_events")
+  .insert({ event_name: "assignment_created" });
+
+  if (analyticsError) {
+    console.error("Failed to track assignment_created:", analyticsError.message);
+  }
 
   revalidatePath("/dashboard");
   revalidatePath(`/classes/${input.classId}`);
@@ -151,6 +158,15 @@ export async function toggleAssignmentComplete(input: {
       .eq("assignment_id", input.id)
       .eq("user_id", user.id);
     if (error) throw new Error("Couldn't update that assignment. Try again.");
+  }
+  if (input.completed) {
+  const { error: analyticsError } = await supabase
+    .from("analytics_events")
+    .insert({ event_name: "assignment_completed" });
+
+    if (analyticsError) {
+      console.error("Failed to track assignment_completed:", analyticsError.message);
+    }
   }
 
   revalidatePath("/dashboard");
