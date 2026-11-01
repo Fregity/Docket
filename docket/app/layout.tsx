@@ -13,8 +13,13 @@ const serif = Fraunces({
 });
 
 export const metadata: Metadata = {
-  title: "DueBird",
-  description: "Stop asking the group chat what the homework was.",
+  metadataBase: new URL("https://myduebird.com"),
+  title: {
+    default: "DueBird — Homework tracker for students",
+    template: "%s | DueBird",
+  },
+  description:
+    "Keep your homework organized. Add assignments, see what's due, and share classwork with friends using DueBird.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -23,6 +28,20 @@ export const metadata: Metadata = {
   },
   icons: {
     apple: "/apple-touch-icon.png",
+  },
+  openGraph: {
+    type: "website",
+    siteName: "DueBird",
+    title: "DueBird — Homework tracker for students",
+    description:
+      "Keep your homework organized. Add assignments, see what's due, and share classwork with friends.",
+    url: "https://myduebird.com",
+  },
+  twitter: {
+    card: "summary",
+    title: "DueBird — Homework tracker for students",
+    description:
+      "Keep your homework organized. Add assignments, see what's due, and share classwork with friends.",
   },
 };
 
@@ -33,7 +52,6 @@ export const viewport: Viewport = {
   ],
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
 };
 
 // Runs before hydration so the correct theme class is on <html> before the

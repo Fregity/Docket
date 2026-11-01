@@ -1,0 +1,23 @@
+# DueBird
+
+> A homework tracker made for students, by students.
+
+## What is DueBird?
+
+DueBird helps students keep track of homework and assignments without
+having to constantly ask their group chats.
+
+## Features
+
+- Keep class homework in one place.
+- Add assignments.
+- See what's due.
+- Share classes with friends.
+
+## Website
+
+https://myduebird.com
+
+## Main page
+
+https://myduebird.com/
