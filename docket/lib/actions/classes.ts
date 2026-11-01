@@ -22,6 +22,14 @@ export async function createClass(input: {
 
   if (error || !newClass) throw new Error("Couldn't create that class. Try again.");
 
+  const { error: analyticsError } = await supabase
+  .from("analytics_events")
+  .insert({ event_name: "class_created" });
+
+  if (analyticsError) {
+    console.error("Failed to track class_created:", analyticsError.message);
+  }
+
   revalidatePath("/dashboard");
   revalidatePath("/classes");
   redirect(`/classes/${newClass.id}?invite=1`);
@@ -41,6 +49,15 @@ export async function joinClassByCode(code: string) {
   if (error || !joinedClass?.id) {
     throw new Error("This invite link isn't valid.");
   }
+
+  const { error: analyticsError } = await supabase
+  .from("analytics_events")
+  .insert({ event_name: "class_joined" });
+
+  if (analyticsError) {
+    console.error("Failed to track class_joined:", analyticsError.message);
+  }
+
 
   revalidatePath("/dashboard");
   revalidatePath("/classes");
