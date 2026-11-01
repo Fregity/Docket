@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { trackEvent } from "@/lib/analytics";
 
 export function ShareClass({
   className,
@@ -19,6 +20,7 @@ export function ShareClass({
 
   async function handleCopyLink() {
     await navigator.clipboard.writeText(inviteUrl);
+    void trackEvent("invite_link_copied");
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2000);
   }
