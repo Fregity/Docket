@@ -3,126 +3,28 @@
 
 import { useRef, useState } from "react";
 import { trackEvent } from "@/lib/analytics";
-import {
-  bucketForDate,
-  BUCKET_LABELS,
-  isoDateFromOffset,
-  type DueBucket,
-} from "@/lib/dates";
-import {
-  AssignmentCard,
-  type AssignmentData,
-} from "@/components/AssignmentCard";
-import { ColorDot, SectionLabel } from "@/components/ui";
+import { isoDateFromOffset, relativeDueLabel } from "@/lib/dates";
+import { ColorDot } from "@/components/ui";
 
 const demoClasses = [
-  {
-    id: "biology",
-    name: "Biology",
-    accent_color: "green",
-  },
-  {
-    id: "algebra",
-    name: "Algebra II",
-    accent_color: "blue",
-  },
-  {
-    id: "history",
-    name: "U.S. History",
-    accent_color: "orange",
-  },
+  { id: "biology", name: "Biology", accent_color: "green" },
+  { id: "algebra", name: "Algebra II", accent_color: "blue" },
+  { id: "history", name: "U.S. History", accent_color: "orange" },
 ];
 
-const demoAssignments: (AssignmentData & {
-  className: string;
-  accentColor: string;
-})[] = [
+const demoAssignments = [
   {
     id: "demo-1",
     class_id: "biology",
     title: "Cell structure worksheet",
-    description: null,
     due_date: isoDateFromOffset(1),
-    completed: false,
-    created_by_name: "Alex",
-    className: "Biology",
-    accentColor: "green",
   },
   {
     id: "demo-2",
     class_id: "algebra",
     title: "Complete problems 1–20",
-    description: "Textbook pages 84–85",
     due_date: isoDateFromOffset(0),
-    completed: false,
-    created_by_name: "Jordan",
-    className: "Algebra II",
-    accentColor: "blue",
   },
-  {
-    id: "demo-3",
-    class_id: "history",
-    title: "Read pages 142–158",
-    description: null,
-    due_date: isoDateFromOffset(3),
-    completed: false,
-    created_by_name: "Sam",
-    className: "U.S. History",
-    accentColor: "orange",
-  },
-  {
-    id: "demo-4",
-    class_id: "biology",
-    title: "Photosynthesis lab questions",
-    description: "Finish the analysis questions",
-    due_date: isoDateFromOffset(6),
-    completed: false,
-    created_by_name: "Alex",
-    className: "Biology",
-    accentColor: "green",
-  },
-  {
-    id: "demo-5",
-    class_id: "algebra",
-    title: "Study for the quiz",
-    description: null,
-    due_date: isoDateFromOffset(9),
-    completed: false,
-    created_by_name: "Taylor",
-    className: "Algebra II",
-    accentColor: "blue",
-  },
-  {
-    id: "demo-6",
-    class_id: "history",
-    title: "Finish Civil War notes",
-    description: null,
-    due_date: isoDateFromOffset(1),
-    completed: false,
-    created_by_name: "Sam",
-    className: "U.S. History",
-    accentColor: "orange",
-  },
-  {
-    id: "demo-7",
-    class_id: "biology",
-    title: "Review chapter 8",
-    description: null,
-    due_date: isoDateFromOffset(15),
-    completed: false,
-    created_by_name: "Alex",
-    className: "Biology",
-    accentColor: "green",
-  },
-];
-
-const buckets: DueBucket[] = [
-  "overdue",
-  "today",
-  "tomorrow",
-  "week",
-  "nextweek",
-  "later",
 ];
 
 export function DemoDashboard() {
@@ -133,13 +35,6 @@ export function DemoDashboard() {
   const visibleAssignments = selectedClass
     ? demoAssignments.filter((a) => a.class_id === selectedClass)
     : demoAssignments;
-
-  const grouped = buckets.map((bucket) => ({
-    bucket,
-    items: visibleAssignments.filter(
-      (a) => bucketForDate(a.due_date) === bucket
-    ),
-  }));
 
   function selectClass(id: string | null) {
     if (id === selectedClass) return;
@@ -160,74 +55,73 @@ export function DemoDashboard() {
   }
 
   return (
-    <section className="w-full max-w-2xl mx-auto px-6 py-8">
-      <div className="mb-7">
-        <p className="text-xs uppercase tracking-widest text-muted mb-2">
+    <section className="w-full max-w-lg mx-auto px-5 py-5">
+      <div className="text-center mb-4">
+        <p className="text-xs uppercase tracking-widest text-muted mb-1">
           Interactive preview
         </p>
-        <h2 className="font-serif text-2xl sm:text-3xl text-ink">
-          Your homework
+        <h2 className="font-serif text-2xl text-ink">
+          See how DueBird works
         </h2>
-        <p className="text-sm text-muted mt-2">
-          Here's what your DueBird dashboard could look like.
-        </p>
       </div>
 
-      <main>
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h3 className="font-serif text-xl text-ink">
-              {selectedClass
-                ? demoClasses.find((c) => c.id === selectedClass)?.name
-                : "Upcoming assignments"}
-            </h3>
-            <p className="text-xs text-muted mt-1">
-              {selectedClass
-                ? "Assignments for this class"
-                : "Homework from all your classes"}
-            </p>
-          </div>
-
+      <div className="max-w-md mx-auto">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="font-serif text-lg text-ink">
+            {selectedClass
+              ? demoClasses.find((c) => c.id === selectedClass)?.name
+              : "Upcoming"}
+          </h3>
           {selectedClass && (
             <button
               onClick={() => selectClass(null)}
-              className="text-sm text-muted underline underline-offset-2"
+              className="text-xs text-muted underline underline-offset-2"
             >
-              All classes
+              Show all
             </button>
           )}
         </div>
 
-        {grouped.map(
-          ({ bucket, items }) =>
-            items.length > 0 && (
-              <section key={bucket}>
-                <SectionLabel>{BUCKET_LABELS[bucket]}</SectionLabel>
+        <div className="flex flex-col gap-2">
+          {visibleAssignments.length > 0 ? (
+            visibleAssignments.map((assignment) => {
+              const classInfo = demoClasses.find(
+                (c) => c.id === assignment.class_id
+              )!;
 
-                <div className="flex flex-col gap-2.5">
-                  {items.map((assignment) => (
-                    <AssignmentCard
-                      key={assignment.id}
-                      assignment={assignment}
-                      className={assignment.className}
-                      accentColor={assignment.accentColor}
-                      showClassName
-                      editableClasses={demoClasses}
-                      readOnly
-                    />
-                  ))}
+              return (
+                <div
+                  key={assignment.id}
+                  className="card flex items-center gap-3"
+                >
+                  <span className="w-5 h-5 shrink-0 rounded-full border-2 border-faint" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-ink truncate">
+                      {assignment.title}
+                    </p>
+                    <div className="flex items-center gap-1.5 mt-1">
+                      <ColorDot colorId={classInfo.accent_color} size={7} />
+                      <span className="text-xs text-muted">
+                        {classInfo.name}
+                      </span>
+                    </div>
+                  </div>
+                  <span className="text-xs text-muted whitespace-nowrap">
+                    {relativeDueLabel(assignment.due_date)}
+                  </span>
                 </div>
-              </section>
-            )
-        )}
+              );
+            })
+          ) : (
+            <p className="card text-sm text-muted text-center">
+              No sample assignments for this class.
+            </p>
+          )}
+        </div>
 
-        <div className="flex items-center justify-between mt-9 mb-3">
-          <h3 className="font-serif text-lg text-ink">
-            My classes
-          </h3>
-          <span className="text-xs text-muted">
-            {demoClasses.length} classes
-          </span>
+        <div className="flex items-center justify-between mt-5 mb-2">
+          <h3 className="font-serif text-lg text-ink">My classes</h3>
+          <span className="text-xs text-muted">3 classes</span>
         </div>
 
         <div className="flex flex-col gap-2">
@@ -237,32 +131,23 @@ export function DemoDashboard() {
               onClick={() =>
                 selectClass(selectedClass === c.id ? null : c.id)
               }
-              className={`card w-full flex items-center gap-3 text-left transition-colors ${
-                selectedClass === c.id
-                  ? "border-ink"
-                  : "hover:border-faint"
+              className={`card w-full flex items-center gap-3 text-left py-3 transition-colors ${
+                selectedClass === c.id ? "border-ink" : "hover:border-faint"
               }`}
             >
-              <ColorDot colorId={c.accent_color} size={10} />
-
-              <span className="text-[15px] flex-1 truncate">
-                {c.name}
-              </span>
-
-              <span className="text-faint text-sm">
+              <ColorDot colorId={c.accent_color} size={9} />
+              <span className="text-sm text-ink flex-1">{c.name}</span>
+              <span className="text-xs text-faint">
                 {selectedClass === c.id ? "✓" : "›"}
               </span>
             </button>
           ))}
         </div>
 
-        <div className="mt-6 rounded-xl bg-wash px-4 py-3">
-          <p className="text-xs text-muted text-center">
-            Sample account — your real classes and assignments are shared
-            with your classmates.
-          </p>
-        </div>
-      </main>
+        <p className="text-xs text-muted text-center mt-3">
+          Sample dashboard · Your classes are shared with classmates
+        </p>
+      </div>
     </section>
   );
 }
