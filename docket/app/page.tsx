@@ -32,6 +32,8 @@ const structuredData = {
 export default function LandingPage() {
   return (
     <main className="min-h-screen flex flex-col">
+      <TrackPageView eventName="landing_viewed" />
+      
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
