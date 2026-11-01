@@ -13,6 +13,7 @@ export default function InstallButton() {
   const [isIos, setIsIos] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const [ready, setReady] = useState(false);
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
 
   useEffect(() => {
     const standalone =
@@ -21,6 +22,10 @@ export default function InstallButton() {
     setInstalled(standalone);
 
     const ua = navigator.userAgent;
+    setIsMobileDevice(
+      /android|iphone|ipad|ipod/i.test(ua) ||
+        (ua.includes("Mac") && navigator.maxTouchPoints > 1)
+    );
     setIsIos(
       /iphone|ipad|ipod/i.test(ua) ||
         (ua.includes("Mac") && navigator.maxTouchPoints > 1)
@@ -55,7 +60,7 @@ export default function InstallButton() {
     setShowHelp((v) => !v);
   }
 
-  if (!ready || installed) return null;
+  if (!ready || installed || !isMobileDevice) return null;
 
   return (
     <div className="w-full">
