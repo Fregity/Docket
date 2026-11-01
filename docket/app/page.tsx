@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import TrackPageView from "@/components/TrackPageView";
+import { DemoDashboard } from "@/components/DemoDashboard";
 
 export const metadata: Metadata = {
   title: "Homework tracker for students",
@@ -33,7 +34,7 @@ export default function LandingPage() {
   return (
     <main className="min-h-screen flex flex-col">
       <TrackPageView eventName="landing_viewed" />
-      
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
