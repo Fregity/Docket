@@ -68,6 +68,8 @@ export default function LandingPage() {
         </div>
       </div>
 
+      <DemoDashboard />
+
       <footer className="text-center pb-8 text-xs text-faint">
         Made for students, by students.
       </footer>
