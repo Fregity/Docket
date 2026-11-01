@@ -7,6 +7,7 @@ import { AddHomeworkModal } from "@/components/AddHomeworkModal";
 import { ColorDot, EmptyState, SectionLabel } from "@/components/ui";
 import { NavBar } from "@/components/NavBar";
 import { Greeting } from "@/components/Greeting";
+import TrackPageView from "@/components/TrackPageView";
 
 export const dynamic = "force-dynamic";
 
@@ -70,6 +71,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen pb-24">
+      <TrackPageView eventName="dashboard_returned" />
       <header className="px-6 pt-10 pb-4 max-w-2xl mx-auto">
         <Greeting firstName={firstName} />
       </header>
