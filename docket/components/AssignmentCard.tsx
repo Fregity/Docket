@@ -25,12 +25,14 @@ export function AssignmentCard({
   accentColor,
   showClassName = false,
   editableClasses,
+  readOnly = false,
 }: {
   assignment: AssignmentData;
   className?: string;
   accentColor: string;
   showClassName?: boolean;
   editableClasses: { id: string; name: string; accent_color: string }[];
+  readOnly?: boolean;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuPos, setMenuPos] = useState<{ top: number; left: number } | null>(null);
@@ -109,20 +111,28 @@ export function AssignmentCard({
 
   return (
     <div className="card flex items-start gap-3 animate-fade-in">
-      <button
-        onClick={handleToggle}
-        disabled={pending}
-        aria-label={completed ? "Mark incomplete" : "Mark complete"}
-        className={`mt-0.5 w-5 h-5 shrink-0 rounded-full border-2 flex items-center justify-center transition-colors ${
-          completed ? "bg-ink border-ink" : "border-faint hover:border-ink"
-        }`}
-      >
-        {completed && (
-          <svg viewBox="0 0 16 16" className="w-3 h-3 text-paper animate-check-pop" fill="none">
-            <path d="M3 8l3.5 3.5L13 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        )}
-      </button>
+      {readOnly ? (
+        <span
+          className={`mt-0.5 w-5 h-5 shrink-0 rounded-full border-2 ${
+            completed ? "bg-ink border-ink" : "border-faint"
+          }`}
+        />
+      ) : (
+        <button
+          onClick={handleToggle}
+          disabled={pending}
+          aria-label={completed ? "Mark incomplete" : "Mark complete"}
+          className={`mt-0.5 w-5 h-5 shrink-0 rounded-full border-2 flex items-center justify-center transition-colors ${
+            completed ? "bg-ink border-ink" : "border-faint hover:border-ink"
+          }`}
+        >
+          {completed && (
+            <svg viewBox="0 0 16 16" className="w-3 h-3 text-paper animate-check-pop" fill="none">
+              <path d="M3 8l3.5 3.5L13 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          )}
+        </button>
+      )}
 
       <div className="flex-1 min-w-0">
         {showClassName && className && (
@@ -163,33 +173,37 @@ export function AssignmentCard({
         </div>
       </div>
 
-      <div className="relative">
-        <button
-          ref={menuButtonRef}
-          onClick={() => (menuOpen ? setMenuOpen(false) : openMenu())}
-          className="text-faint hover:text-ink px-1 py-1 rounded"
-          aria-label="Assignment options"
-        >
-          •••
-        </button>
-        {typeof document !== "undefined" && createPortal(menuContent, document.body)}
-      </div>
+      {!readOnly && (
+        <>
+          <div className="relative">
+            <button
+              ref={menuButtonRef}
+              onClick={() => (menuOpen ? setMenuOpen(false) : openMenu())}
+              className="text-faint hover:text-ink px-1 py-1 rounded"
+              aria-label="Assignment options"
+            >
+              •••
+            </button>
+            {typeof document !== "undefined" && createPortal(menuContent, document.body)}
+          </div>
 
-      <AddHomeworkModal
-        classes={editableClasses}
-        lockedClassId={assignment.class_id}
-        existing={{
-          id: assignment.id,
-          class_id: assignment.class_id,
-          title: assignment.title,
-          description: assignment.description,
-          due_date: assignment.due_date,
-          recurrence_interval_weeks: assignment.recurrence_interval_weeks ?? null,
-          recurrence_monthly: assignment.recurrence_monthly ?? false,
-        }}
-        open={editOpen}
-        onOpenChange={setEditOpen}
-      />
+          <AddHomeworkModal
+            classes={editableClasses}
+            lockedClassId={assignment.class_id}
+            existing={{
+              id: assignment.id,
+              class_id: assignment.class_id,
+              title: assignment.title,
+              description: assignment.description,
+              due_date: assignment.due_date,
+              recurrence_interval_weeks: assignment.recurrence_interval_weeks ?? null,
+              recurrence_monthly: assignment.recurrence_monthly ?? false,
+            }}
+            open={editOpen}
+            onOpenChange={setEditOpen}
+          />
+        </>
+      )}
     </div>
   );
 }
