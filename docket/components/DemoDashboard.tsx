@@ -3,48 +3,145 @@
 
 import { useRef, useState } from "react";
 import { trackEvent } from "@/lib/analytics";
+import {
+  bucketForDate,
+  BUCKET_LABELS,
+  isoDateFromOffset,
+  type DueBucket,
+} from "@/lib/dates";
+import {
+  AssignmentCard,
+  type AssignmentData,
+} from "@/components/AssignmentCard";
+import { ColorDot, SectionLabel } from "@/components/ui";
 
 const demoClasses = [
   {
     id: "biology",
     name: "Biology",
-    color: "#779B72",
-    assignments: [
-      { title: "Cell structure worksheet", due: "Tomorrow" },
-      { title: "Read chapter 8", due: "Wednesday" },
-      { title: "Photosynthesis lab questions", due: "Friday" },
-    ],
+    accent_color: "green",
   },
   {
     id: "algebra",
-    name: "Algebra",
-    color: "#7895B2",
-    assignments: [
-      { title: "Complete problems 1–20", due: "Tomorrow" },
-      { title: "Study for the quiz", due: "Thursday" },
-    ],
+    name: "Algebra II",
+    accent_color: "blue",
   },
   {
     id: "history",
-    name: "History",
-    color: "#B58B65",
-    assignments: [
-      { title: "Read pages 142–158", due: "Wednesday" },
-      { title: "Finish Civil War notes", due: "Friday" },
-      { title: "Primary source analysis", due: "Next Monday" },
-    ],
+    name: "U.S. History",
+    accent_color: "orange",
   },
 ];
 
+const demoAssignments: (AssignmentData & {
+  className: string;
+  accentColor: string;
+})[] = [
+  {
+    id: "demo-1",
+    class_id: "biology",
+    title: "Cell structure worksheet",
+    description: null,
+    due_date: isoDateFromOffset(1),
+    completed: false,
+    created_by_name: "Alex",
+    className: "Biology",
+    accentColor: "green",
+  },
+  {
+    id: "demo-2",
+    class_id: "algebra",
+    title: "Complete problems 1–20",
+    description: "Textbook pages 84–85",
+    due_date: isoDateFromOffset(0),
+    completed: false,
+    created_by_name: "Jordan",
+    className: "Algebra II",
+    accentColor: "blue",
+  },
+  {
+    id: "demo-3",
+    class_id: "history",
+    title: "Read pages 142–158",
+    description: null,
+    due_date: isoDateFromOffset(3),
+    completed: false,
+    created_by_name: "Sam",
+    className: "U.S. History",
+    accentColor: "orange",
+  },
+  {
+    id: "demo-4",
+    class_id: "biology",
+    title: "Photosynthesis lab questions",
+    description: "Finish the analysis questions",
+    due_date: isoDateFromOffset(6),
+    completed: false,
+    created_by_name: "Alex",
+    className: "Biology",
+    accentColor: "green",
+  },
+  {
+    id: "demo-5",
+    class_id: "algebra",
+    title: "Study for the quiz",
+    description: null,
+    due_date: isoDateFromOffset(9),
+    completed: false,
+    created_by_name: "Taylor",
+    className: "Algebra II",
+    accentColor: "blue",
+  },
+  {
+    id: "demo-6",
+    class_id: "history",
+    title: "Finish Civil War notes",
+    description: null,
+    due_date: isoDateFromOffset(1),
+    completed: false,
+    created_by_name: "Sam",
+    className: "U.S. History",
+    accentColor: "orange",
+  },
+  {
+    id: "demo-7",
+    class_id: "biology",
+    title: "Review chapter 8",
+    description: null,
+    due_date: isoDateFromOffset(15),
+    completed: false,
+    created_by_name: "Alex",
+    className: "Biology",
+    accentColor: "green",
+  },
+];
+
+const buckets: DueBucket[] = [
+  "overdue",
+  "today",
+  "tomorrow",
+  "week",
+  "nextweek",
+  "later",
+];
+
 export function DemoDashboard() {
-  const [selectedClass, setSelectedClass] = useState("biology");
+  const [selectedClass, setSelectedClass] = useState<string | null>(null);
   const started = useRef(false);
   const completed = useRef(false);
 
-  const currentClass =
-    demoClasses.find((c) => c.id === selectedClass) ?? demoClasses[0];
+  const visibleAssignments = selectedClass
+    ? demoAssignments.filter((a) => a.class_id === selectedClass)
+    : demoAssignments;
 
-  function selectClass(id: string) {
+  const grouped = buckets.map((bucket) => ({
+    bucket,
+    items: visibleAssignments.filter(
+      (a) => bucketForDate(a.due_date) === bucket
+    ),
+  }));
+
+  function selectClass(id: string | null) {
     if (id === selectedClass) return;
 
     if (!started.current) {
@@ -57,85 +154,115 @@ export function DemoDashboard() {
     if (!completed.current) {
       completed.current = true;
       void trackEvent("demo_step_completed", {
-        step: "class_switching",
+        step: "class_selection",
       });
     }
   }
 
   return (
-    <section className="w-full max-w-xl mx-auto px-5 py-12">
-      <div className="text-center mb-7">
-        <p className="text-xs uppercase tracking-widest text-muted mb-3">
+    <section className="w-full max-w-2xl mx-auto px-6 py-8">
+      <div className="mb-7">
+        <p className="text-xs uppercase tracking-widest text-muted mb-2">
           Interactive preview
         </p>
         <h2 className="font-serif text-2xl sm:text-3xl text-ink">
-          Your classes. Your homework. All in one place.
+          Your homework
         </h2>
-        <p className="text-sm text-muted mt-3">
-          Pick a class to see what you have coming up.
+        <p className="text-sm text-muted mt-2">
+          Here's what your DueBird dashboard could look like.
         </p>
       </div>
 
-      <div className="rounded-2xl border border-hairline bg-paper overflow-hidden shadow-sm">
-        <div className="px-5 py-4 border-b border-hairline flex items-center justify-between">
-          <span className="font-serif text-lg">My classes</span>
-          <span className="text-xs text-muted">Sample account</span>
+      <main>
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h3 className="font-serif text-xl text-ink">
+              {selectedClass
+                ? demoClasses.find((c) => c.id === selectedClass)?.name
+                : "Upcoming assignments"}
+            </h3>
+            <p className="text-xs text-muted mt-1">
+              {selectedClass
+                ? "Assignments for this class"
+                : "Homework from all your classes"}
+            </p>
+          </div>
+
+          {selectedClass && (
+            <button
+              onClick={() => selectClass(null)}
+              className="text-sm text-muted underline underline-offset-2"
+            >
+              All classes
+            </button>
+          )}
         </div>
 
-        <div className="flex gap-2 p-3 border-b border-hairline overflow-x-auto">
+        {grouped.map(
+          ({ bucket, items }) =>
+            items.length > 0 && (
+              <section key={bucket}>
+                <SectionLabel>{BUCKET_LABELS[bucket]}</SectionLabel>
+
+                <div className="flex flex-col gap-2.5">
+                  {items.map((assignment) => (
+                    <AssignmentCard
+                      key={assignment.id}
+                      assignment={assignment}
+                      className={assignment.className}
+                      accentColor={assignment.accentColor}
+                      showClassName
+                      editableClasses={demoClasses}
+                      readOnly
+                    />
+                  ))}
+                </div>
+              </section>
+            )
+        )}
+
+        <div className="flex items-center justify-between mt-9 mb-3">
+          <h3 className="font-serif text-lg text-ink">
+            My classes
+          </h3>
+          <span className="text-xs text-muted">
+            {demoClasses.length} classes
+          </span>
+        </div>
+
+        <div className="flex flex-col gap-2">
           {demoClasses.map((c) => (
             <button
               key={c.id}
-              onClick={() => selectClass(c.id)}
-              className={`shrink-0 rounded-lg px-3 py-2 text-sm transition-colors ${
+              onClick={() =>
+                selectClass(selectedClass === c.id ? null : c.id)
+              }
+              className={`card w-full flex items-center gap-3 text-left transition-colors ${
                 selectedClass === c.id
-                  ? "bg-ink text-paper"
-                  : "bg-wash text-muted hover:text-ink"
+                  ? "border-ink"
+                  : "hover:border-faint"
               }`}
             >
-              {c.name}
+              <ColorDot colorId={c.accent_color} size={10} />
+
+              <span className="text-[15px] flex-1 truncate">
+                {c.name}
+              </span>
+
+              <span className="text-faint text-sm">
+                {selectedClass === c.id ? "✓" : "›"}
+              </span>
             </button>
           ))}
         </div>
 
-        <div className="p-5 min-h-64">
-          <div className="flex items-center gap-2 mb-5">
-            <span
-              className="w-2.5 h-2.5 rounded-full"
-              style={{ backgroundColor: currentClass.color }}
-            />
-            <h3 className="font-serif text-xl">{currentClass.name}</h3>
-            <span className="text-xs text-muted ml-auto">
-              {currentClass.assignments.length} assignments
-            </span>
-          </div>
-
-          <div className="flex flex-col gap-3">
-            {currentClass.assignments.map((assignment) => (
-              <div
-                key={assignment.title}
-                className="rounded-xl border border-hairline p-4 flex items-center justify-between gap-3"
-              >
-                <div className="flex items-center gap-3 min-w-0">
-                  <span className="w-4 h-4 rounded-full border-2 border-hairline shrink-0" />
-                  <span className="text-sm truncate">
-                    {assignment.title}
-                  </span>
-                </div>
-                <span className="text-xs text-muted whitespace-nowrap">
-                  {assignment.due}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="px-5 py-3 bg-wash border-t border-hairline">
+        <div className="mt-6 rounded-xl bg-wash px-4 py-3">
           <p className="text-xs text-muted text-center">
-            This is a sample dashboard. Your real classes are shared with classmates.
+            Sample account — your real classes and assignments are shared
+            with your classmates.
           </p>
         </div>
-      </div>
+      </main>
     </section>
   );
 }
