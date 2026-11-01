@@ -51,7 +51,6 @@ function LoginContent() {
 
       setLoading(false);
       if (error) return setError(error.message);
-      void trackEvent("signup_completed");
 
       const { data } = await supabase.auth.getSession();
       if (!data.session) {
