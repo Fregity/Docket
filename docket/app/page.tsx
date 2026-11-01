@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import TrackPageView from "@/components/TrackPageView";
-import { DemoDashboard } from "@/components/DemoDashboard";
 
 export const metadata: Metadata = {
   title: "Homework tracker for students",
@@ -42,35 +41,72 @@ export default function LandingPage() {
         }}
       />
 
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-20 text-center">
-        <p className="text-sm text-muted tracking-wide mb-6">DueBird</p>
+      <header className="w-full max-w-6xl mx-auto px-6 pt-7 flex items-center justify-between">
+        <span className="font-serif text-xl text-ink">DueBird</span>
+        <span className="text-xs text-muted">Step 1 of 3</span>
+      </header>
 
-        <h1 className="font-serif text-4xl sm:text-5xl leading-tight max-w-lg text-ink">
-          What did we have for homework?
-        </h1>
-
-        <p className="text-lg text-ink/80 mt-5">
-          Stop asking the group chat.
-        </p>
-
-        <p className="text-muted text-[15px] max-w-sm mt-3">
-          Keep your classes&rsquo; homework in one place. Add assignments,
-          see what&rsquo;s due, and share your class with friends.
-        </p>
-
-        <div className="flex flex-col sm:flex-row gap-3 mt-9 w-full max-w-xs sm:max-w-none sm:w-auto">
-          <Link href="/login" className="btn-primary">
-            Get started
-          </Link>
-          <Link href="/login?intent=join" className="btn-secondary">
-            Join a class
-          </Link>
+      <div className="w-full max-w-6xl mx-auto px-6 mt-5">
+        <div className="h-1 rounded-full bg-wash overflow-hidden">
+          <div className="h-full w-1/3 rounded-full bg-ink" />
         </div>
       </div>
 
-      <DemoDashboard />
+      <section className="flex-1 flex flex-col items-center justify-center px-6 py-16 text-center">
+        <p className="text-xs uppercase tracking-[0.2em] text-muted mb-7">
+          A better way to keep track of school
+        </p>
 
-      <footer className="text-center pb-8 text-xs text-faint">
+        <h1 className="font-serif text-5xl sm:text-6xl md:text-7xl leading-[1.08] max-w-3xl text-ink">
+          What did we have for homework?
+        </h1>
+
+        <p className="font-serif italic text-2xl sm:text-3xl mt-5 text-muted">
+          Stop asking the group chat.
+        </p>
+
+        <p className="text-base sm:text-lg text-muted max-w-lg mt-7 leading-relaxed">
+          Your classes, assignments, and due dates, all in one place.
+          Share homework with classmates and always know what's coming up.
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 max-w-2xl w-full mt-12 text-left">
+          <div className="rounded-xl border border-hairline p-4">
+            <p className="font-serif text-lg text-ink">Your classes</p>
+            <p className="text-sm text-muted mt-1">
+              Keep every class organized in one place.
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-hairline p-4">
+            <p className="font-serif text-lg text-ink">Shared homework</p>
+            <p className="text-sm text-muted mt-1">
+              Keep your whole class on the same page.
+            </p>
+          </div>
+
+          <div className="rounded-xl border border-hairline p-4">
+            <p className="font-serif text-lg text-ink">Upcoming work</p>
+            <p className="text-sm text-muted mt-1">
+              Know what's due and when.
+            </p>
+          </div>
+        </div>
+
+        <Link
+          href="/demo"
+          className="btn-primary mt-10 px-10 py-4 text-base"
+        >
+          See how it works
+          <span className="ml-2" aria-hidden="true">→</span>
+        </Link>
+
+        <p className="text-xs text-faint mt-4">
+          Takes less than a minute to explore.
+        </p>
+      </section>
+
+      <footer className="text-center pb-7 text-xs text-faint">
         Made for students, by students.
       </footer>
     </main>
