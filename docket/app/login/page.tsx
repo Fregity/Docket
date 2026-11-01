@@ -1,5 +1,6 @@
 "use client";
 
+import { trackEvent } from "@/lib/analytics";
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -50,6 +51,7 @@ function LoginContent() {
 
       setLoading(false);
       if (error) return setError(error.message);
+      void trackEvent("signup_completed");
 
       const { data } = await supabase.auth.getSession();
       if (!data.session) {
@@ -139,6 +141,9 @@ function LoginContent() {
           <button
             className="text-ink underline underline-offset-2"
             onClick={() => {
+              if (mode === "signin") {
+                void trackEvent("signup_page_viewed");
+              }
               setMode(mode === "signin" ? "signup" : "signin");
               setError(null);
               setNotice(null);

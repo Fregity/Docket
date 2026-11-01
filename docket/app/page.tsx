@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import TrackPageView from "@/components/TrackPageView";
 
 export const metadata: Metadata = {
   title: "Homework tracker for students",
