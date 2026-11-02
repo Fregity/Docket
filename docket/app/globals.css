@@ -74,8 +74,6 @@
   }
 }
 
-
-
 /* Onboarding page transitions */
 
 @keyframes onboarding-enter {
@@ -113,6 +111,11 @@
   animation: onboarding-enter 450ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
+.onboarding-exiting .onboarding-page {
+  animation: onboarding-exit 180ms ease-in both;
+  pointer-events: none;
+}
+
 .onboarding-progress-fill {
   transform-origin: left;
   animation: onboarding-progress 700ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
@@ -129,6 +132,7 @@
 @media (prefers-reduced-motion: reduce) {
   .onboarding-page,
   .onboarding-progress-fill,
+  .onboarding-exiting .onboarding-page,
   ::view-transition-old(root),
   ::view-transition-new(root) {
     animation: none !important;
