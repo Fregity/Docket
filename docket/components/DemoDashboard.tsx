@@ -29,8 +29,9 @@ const demoAssignments = [
 
 export function DemoDashboard() {
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
+  const [completed, setCompleted] = useState<string[]>([]);
   const started = useRef(false);
-  const completed = useRef(false);
+  const trackedSelection = useRef(false);
 
   const visibleAssignments = selectedClass
     ? demoAssignments.filter((a) => a.class_id === selectedClass)
@@ -46,12 +47,20 @@ export function DemoDashboard() {
 
     setSelectedClass(id);
 
-    if (!completed.current) {
-      completed.current = true;
+    if (!trackedSelection.current) {
+      trackedSelection.current = true;
       void trackEvent("demo_step_completed", {
         step: "class_selection",
       });
     }
+  }
+
+  function toggleAssignment(id: string) {
+    setCompleted((current) =>
+      current.includes(id)
+        ? current.filter((item) => item !== id)
+        : [...current, id]
+    );
   }
 
   return (
@@ -88,15 +97,53 @@ export function DemoDashboard() {
               const classInfo = demoClasses.find(
                 (c) => c.id === assignment.class_id
               )!;
+              const isCompleted = completed.includes(assignment.id);
 
               return (
                 <div
                   key={assignment.id}
                   className="card flex items-center gap-3"
                 >
-                  <span className="w-5 h-5 shrink-0 rounded-full border-2 border-faint" />
+                  <button
+                    type="button"
+                    onClick={() => toggleAssignment(assignment.id)}
+                    aria-label={
+                      isCompleted
+                        ? "Mark assignment incomplete"
+                        : "Mark assignment complete"
+                    }
+                    aria-pressed={isCompleted}
+                    className={`w-5 h-5 shrink-0 rounded-full border-2 flex items-center justify-center transition-colors ${
+                      isCompleted
+                        ? "bg-ink border-ink"
+                        : "border-faint hover:border-ink"
+                    }`}
+                  >
+                    {isCompleted && (
+                      <svg
+                        viewBox="0 0 16 16"
+                        className="w-3 h-3 text-paper"
+                        fill="none"
+                      >
+                        <path
+                          d="M3 8l3.5 3.5L13 5"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    )}
+                  </button>
+
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-ink truncate">
+                    <p
+                      className={`text-sm truncate ${
+                        isCompleted
+                          ? "text-faint line-through"
+                          : "text-ink"
+                      }`}
+                    >
                       {assignment.title}
                     </p>
                     <div className="flex items-center gap-1.5 mt-1">
@@ -106,8 +153,9 @@ export function DemoDashboard() {
                       </span>
                     </div>
                   </div>
+
                   <span className="text-xs text-muted whitespace-nowrap">
-                    {relativeDueLabel(assignment.due_date)}
+                    {relativeDueLabel(assignment.due_date, isCompleted)}
                   </span>
                 </div>
               );
