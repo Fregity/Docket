@@ -109,7 +109,6 @@
 
 .onboarding-page {
   animation: onboarding-enter 450ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
-  animation: onboarding-enter 2s ease both !important;
 }
 
 .onboarding-exiting .onboarding-page {
@@ -138,4 +137,8 @@
   ::view-transition-new(root) {
     animation: none !important;
   }
+}
+
+.onboarding-page {
+  animation: onboarding-enter 2s ease both !important;
 }
