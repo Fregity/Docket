@@ -138,7 +138,3 @@
     animation: none !important;
   }
 }
-
-.onboarding-page {
-  animation: onboarding-enter 2s ease both !important;
-}
