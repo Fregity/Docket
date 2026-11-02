@@ -35,17 +35,17 @@ export default function DemoPage() {
 
         <div className="w-full max-w-xl px-5 flex flex-col sm:flex-row gap-3 mt-2">
           <Link
-            href="/"
-            className="btn-secondary flex-1 text-center"
-          >
-            Back
-          </Link>
-
-          <Link
             href="/get-started"
             className="btn-primary flex-1 text-center"
           >
             Continue
+          </Link>
+
+          <Link
+            href="/"
+            className="btn-secondary flex-1 text-center"
+          >
+            Back
           </Link>
         </div>
       </div>
