@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
 import { Fraunces } from "next/font/google";
 import { ThemeSync } from "@/components/ThemeSync";
+import { OnboardingTransitions } from "@/components/OnboardingTransitions";
 import "./globals.css";
 
 const serif = Fraunces({
@@ -80,6 +81,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen font-sans">
         <ThemeSync />
+        <OnboardingTransitions />
         {children}
       </body>
     </html>

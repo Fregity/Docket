@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function GetStartedPage() {
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-6 py-12 text-center">
+    <main className="min-h-screen flex flex-col items-center justify-center px-6 py-12 text-center onboarding-page">
       <div className="w-full max-w-lg">
         <p className="text-sm text-muted tracking-wide mb-5">DueBird</p>
 

@@ -31,7 +31,7 @@ const structuredData = {
 
 export default function LandingPage() {
   return (
-    <main className="min-h-screen flex flex-col">
+    <main className="min-h-screen flex flex-col onboarding-page">
       <TrackPageView eventName="landing_viewed" />
 
       <script
@@ -48,7 +48,7 @@ export default function LandingPage() {
 
       <div className="w-full max-w-6xl mx-auto px-6 mt-5">
         <div className="h-1 rounded-full bg-wash overflow-hidden">
-          <div className="h-full w-1/3 rounded-full bg-ink" />
+          <div className="h-full w-1/3 rounded-full bg-ink onboarding-progress-fill" />
         </div>
       </div>
 

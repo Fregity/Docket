@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
 export default function DemoPage() {
   return (
-    <main className="min-h-screen flex flex-col px-5 py-8 sm:py-10">
+    <main className="min-h-screen flex flex-col px-5 py-8 sm:py-10 onboarding-page">
       <header className="w-full max-w-5xl mx-auto flex items-center justify-between">
         <Link href="/" className="font-serif text-lg text-ink">
           DueBird
@@ -26,7 +26,7 @@ export default function DemoPage() {
 
       <div className="w-full max-w-5xl mx-auto mt-5">
         <div className="h-1 rounded-full bg-wash overflow-hidden">
-          <div className="h-full w-2/3 rounded-full bg-ink" />
+          <div className="h-full w-2/3 rounded-full bg-ink onboarding-progress-fill" />
         </div>
       </div>
 
