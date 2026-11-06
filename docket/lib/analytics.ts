@@ -42,8 +42,6 @@ export async function trackEvent(
       "duebird_session_id"
     );
 
-    // Keep event metadata small and avoid accidentally sending
-    // large or unserializable objects.
     const serialized = JSON.stringify(properties);
 
     if (new TextEncoder().encode(serialized).length > 2048) {
@@ -52,12 +50,18 @@ export async function trackEvent(
 
     const supabase = createClient();
 
+    // Attach the authenticated user's ID when available.
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
     const { error } = await supabase
       .from("analytics_events")
       .insert({
         event_name: eventName,
         visitor_id: visitorId,
         session_id: sessionId,
+        user_id: session?.user.id ?? null,
         properties,
       });
 
