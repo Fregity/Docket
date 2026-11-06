@@ -12,6 +12,12 @@ export async function createClass(input: {
 }) {
   const supabase = await createClient();
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  
+  if (!user) throw new Error("not_authenticated");
+  
   const { data, error } = await supabase.rpc("create_class", {
     p_name: input.name.trim(),
     p_period: input.period?.trim() || "",
@@ -24,7 +30,10 @@ export async function createClass(input: {
 
   const { error: analyticsError } = await supabase
   .from("analytics_events")
-  .insert({ event_name: "class_created" });
+  .insert({
+    event_name: "class_created",
+    user_id: user.id,
+  });
 
   if (analyticsError) {
     console.error("Failed to track class_created:", analyticsError.message);
@@ -38,6 +47,12 @@ export async function createClass(input: {
 export async function joinClassByCode(code: string) {
   const supabase = await createClient();
 
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) throw new Error("not_authenticated");
+  
   const { data, error } = await supabase.rpc("join_class_by_code", {
     p_code: code.trim(),
   });
@@ -52,7 +67,10 @@ export async function joinClassByCode(code: string) {
 
   const { error: analyticsError } = await supabase
   .from("analytics_events")
-  .insert({ event_name: "class_joined" });
+  .insert({
+    event_name: "class_joined",
+    user_id: user.id,
+  });
 
   if (analyticsError) {
     console.error("Failed to track class_joined:", analyticsError.message);
