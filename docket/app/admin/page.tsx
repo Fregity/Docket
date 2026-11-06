@@ -9,6 +9,21 @@ interface AdminStats {
   total_assignments: number;
 }
 
+interface AdminAnalytics {
+  total_events: number;
+  unique_visitors: number;
+  unique_sessions: number;
+  landing_views: number;
+  signups: number;
+  classes_created: number;
+  classes_joined: number;
+  assignments_created: number;
+  assignments_completed: number;
+  demo_starts: number;
+  demo_completions: number;
+  returning_visitors: number;
+}
+
 export default async function AdminPage() {
   const supabase = await createClient();
 
@@ -37,18 +52,30 @@ export default async function AdminPage() {
     );
   }
 
-  const { data, error } = await supabase
-    .rpc("admin_counts")
-    .maybeSingle();
+  const [countsResponse, analyticsResponse] = await Promise.all([
+    supabase.rpc("admin_counts").maybeSingle(),
+    supabase.rpc("admin_analytics").maybeSingle(),
+  ]);
 
-  if (error) {
-    console.error("admin_counts RPC error:", error);
+  if (countsResponse.error) {
+    console.error("admin_counts RPC error:", countsResponse.error);
   }
 
-  const result = data as AdminStats | null;
-  const statsAvailable = !error && result !== null;
+  if (analyticsResponse.error) {
+    console.error("admin_analytics RPC error:", analyticsResponse.error);
+  }
 
-  const stats = [
+  const result = countsResponse.data as AdminStats | null;
+  const analytics = analyticsResponse.data as AdminAnalytics | null;
+
+  const statsAvailable = !countsResponse.error && result !== null;
+  const analyticsAvailable =
+    !analyticsResponse.error && analytics !== null;
+
+  const format = (value: number | undefined) =>
+    value !== undefined ? value.toLocaleString("en-US") : "—";
+
+  const platformStats = [
     {
       label: "Total users",
       value: result?.total_users,
@@ -69,15 +96,67 @@ export default async function AdminPage() {
     },
   ];
 
-  const formatted = (value: number | undefined) =>
-    statsAvailable && value !== undefined
-      ? value.toLocaleString("en-US")
-      : "—";
+  const engagementStats = [
+    {
+      label: "Total events",
+      value: analytics?.total_events,
+      description: "Tracked interactions",
+    },
+    {
+      label: "Unique visitors",
+      value: analytics?.unique_visitors,
+      description: "Distinct visitor IDs",
+    },
+    {
+      label: "Sessions",
+      value: analytics?.unique_sessions,
+      description: "Distinct session IDs",
+    },
+    {
+      label: "Returning visitors",
+      value: analytics?.returning_visitors,
+      description: "Visitors with multiple events",
+    },
+  ];
+
+  const activityStats = [
+    {
+      label: "Landing page views",
+      value: analytics?.landing_views,
+    },
+    {
+      label: "Signups",
+      value: analytics?.signups,
+    },
+    {
+      label: "Demo starts",
+      value: analytics?.demo_starts,
+    },
+    {
+      label: "Demo steps completed",
+      value: analytics?.demo_completions,
+    },
+    {
+      label: "Classes created",
+      value: analytics?.classes_created,
+    },
+    {
+      label: "Classes joined",
+      value: analytics?.classes_joined,
+    },
+    {
+      label: "Assignments created",
+      value: analytics?.assignments_created,
+    },
+    {
+      label: "Assignments completed",
+      value: analytics?.assignments_completed,
+    },
+  ];
 
   return (
     <main className="min-h-screen bg-wash">
       <div className="max-w-5xl mx-auto px-5 sm:px-8 py-10 sm:py-14">
-        {/* Header */}
         <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-5 mb-10">
           <div>
             <div className="flex items-center gap-2 mb-4">
@@ -101,7 +180,6 @@ export default async function AdminPage() {
           </div>
         </header>
 
-        {/* Main stats */}
         <section>
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-medium">Platform overview</h2>
@@ -109,7 +187,7 @@ export default async function AdminPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {stats.map((stat, index) => (
+            {platformStats.map((stat, index) => (
               <div
                 key={stat.label}
                 className="rounded-2xl border border-hairline bg-paper p-5 sm:p-6 relative overflow-hidden"
@@ -122,7 +200,7 @@ export default async function AdminPage() {
                 </div>
 
                 <p className="font-serif text-4xl sm:text-5xl tracking-tight tabular-nums">
-                  {formatted(stat.value)}
+                  {statsAvailable ? format(stat.value) : "—"}
                 </p>
 
                 <p className="text-xs text-muted mt-3">
@@ -143,52 +221,66 @@ export default async function AdminPage() {
           </div>
         </section>
 
-        {/* Analytics area */}
         <section className="mt-10">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-medium">Analytics</h2>
-            <span className="text-xs text-muted">More metrics coming</span>
+            <h2 className="text-sm font-medium">Engagement</h2>
+            <span className="text-xs text-muted">All-time tracked activity</span>
           </div>
 
-          <div className="rounded-2xl border border-hairline bg-paper p-6 sm:p-8">
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-xl bg-wash flex items-center justify-center shrink-0">
-                <span className="text-lg text-muted">↗</span>
-              </div>
-
-              <div>
-                <h3 className="font-serif text-xl mb-2">
-                  The bigger picture
-                </h3>
-                <p className="text-sm text-muted leading-relaxed max-w-xl">
-                  This is where growth trends, new signups, activity,
-                  class distribution, and assignment trends will live.
-                  The current database endpoint only provides the three
-                  all-time totals above.
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {engagementStats.map((stat) => (
+              <div
+                key={stat.label}
+                className="rounded-2xl border border-hairline bg-paper p-5"
+              >
+                <p className="text-xs text-muted">{stat.label}</p>
+                <p className="font-serif text-3xl mt-3 tabular-nums">
+                  {analyticsAvailable ? format(stat.value) : "—"}
+                </p>
+                <p className="text-xs text-muted mt-2">
+                  {stat.description}
                 </p>
               </div>
-            </div>
-
-            <div className="border-t border-hairline mt-6 pt-5 grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {["Growth", "Engagement", "Classes", "Assignments"].map(
-                (item) => (
-                  <div key={item}>
-                    <p className="text-xs text-muted">{item}</p>
-                    <p className="text-sm mt-1">Not available yet</p>
-                  </div>
-                )
-              )}
-            </div>
+            ))}
           </div>
         </section>
 
-        {/* Footer */}
+        <section className="mt-10">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-medium">Event breakdown</h2>
+            <span className="text-xs text-muted">All-time counts</span>
+          </div>
+
+          <div className="rounded-2xl border border-hairline bg-paper divide-y divide-hairline">
+            {activityStats.map((stat) => (
+              <div
+                key={stat.label}
+                className="flex items-center justify-between gap-4 px-5 py-4"
+              >
+                <span className="text-sm text-muted">{stat.label}</span>
+                <span className="font-medium tabular-nums">
+                  {analyticsAvailable ? format(stat.value) : "—"}
+                </span>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <p className="text-xs text-muted mt-5 leading-relaxed">
+          Analytics exclude events associated with the administrator&apos;s
+          user and visitor IDs. Historical events without identifying IDs
+          cannot be reliably attributed. Activity is all-time because
+          event timestamps are not currently stored.
+        </p>
+
         <footer className="mt-12 pt-5 border-t border-hairline flex flex-col sm:flex-row justify-between gap-2">
           <p className="text-xs text-muted">
             DueBird internal tools
           </p>
           <p className="text-xs text-muted">
-            {statsAvailable ? "Data loaded successfully" : "Unable to load statistics"}
+            {statsAvailable && analyticsAvailable
+              ? "All data loaded successfully"
+              : "Some statistics could not be loaded"}
           </p>
         </footer>
       </div>
