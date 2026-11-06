@@ -75,8 +75,11 @@ export async function addAssignment(input: {
   if (error) throw new Error("Couldn't save that assignment. Try again.");
   const { error: analyticsError } = await supabase
   .from("analytics_events")
-  .insert({ event_name: "assignment_created" });
-
+  .insert({
+    event_name: "assignment_created",
+    user_id: user.id,
+  });
+  
   if (analyticsError) {
     console.error("Failed to track assignment_created:", analyticsError.message);
   }
@@ -162,8 +165,10 @@ export async function toggleAssignmentComplete(input: {
   if (input.completed) {
   const { error: analyticsError } = await supabase
     .from("analytics_events")
-    .insert({ event_name: "assignment_completed" });
-
+    .insert({
+      event_name: "assignment_completed",
+      user_id: user.id,
+    });
     if (analyticsError) {
       console.error("Failed to track assignment_completed:", analyticsError.message);
     }
