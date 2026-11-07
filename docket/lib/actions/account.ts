@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export async function signOut() {
   const supabase = await createClient();
@@ -15,6 +16,7 @@ export async function updateDisplayName(name: string) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
   if (!user) throw new Error("not_authenticated");
 
   const { error } = await supabase
@@ -23,6 +25,34 @@ export async function updateDisplayName(name: string) {
     .eq("id", user.id);
 
   if (error) throw new Error("Couldn't save your name. Try again.");
+
   revalidatePath("/settings");
   revalidatePath("/dashboard");
+}
+
+export async function deleteAccount() {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    throw new Error("You must be signed in to delete your account.");
+  }
+
+  const admin = createAdminClient();
+
+  const { error } = await admin.auth.admin.deleteUser(user.id);
+
+  if (error) {
+    console.error("Account deletion failed:", error.message);
+    throw new Error("Couldn't delete your account. Please try again.");
+  }
+
+  await supabase.auth.signOut({ scope: "local" });
+
+  revalidatePath("/", "layout");
+  redirect("/");
 }

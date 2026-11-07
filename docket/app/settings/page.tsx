@@ -3,6 +3,7 @@ import { signOut, updateDisplayName } from "@/lib/actions/account";
 import { NavBar } from "@/components/NavBar";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import InstallButton from "@/components/InstallButton";
+import { DeleteAccountButton } from "@/components/DeleteAccountButton";
 
 export const dynamic = "force-dynamic";
 
@@ -61,6 +62,7 @@ export default async function SettingsPage() {
             Sign out
           </button>
         </form>
+        <DeleteAccountButton />
       </main>
 
       <NavBar />
