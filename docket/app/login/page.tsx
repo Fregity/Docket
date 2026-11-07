@@ -141,6 +141,11 @@ function LoginContent() {
               <a href="/privacy" className="underline">Privacy Policy</a>.
             </p>
           )}
+          {mode === "signup" && (
+            <p className="text-xs text-muted">
+              You must be at least 13 years old to create a DueBird account.
+            </p>
+          )}
 
           <button type="submit" className="btn-primary mt-2" disabled={loading}>
             {loading ? "Please wait…" : mode === "signin" ? "Sign in" : "Sign up"}
