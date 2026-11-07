@@ -133,6 +133,15 @@ function LoginContent() {
           {error && <p className="text-sm" style={{ color: "#9C4A32" }}>{error}</p>}
           {notice && <p className="text-sm text-muted">{notice}</p>}
 
+          {mode === "signup" && (
+            <p className="text-xs text-muted leading-relaxed">
+              By creating an account, you agree to our{" "}
+              <a href="/terms" className="underline">Terms of Service</a>
+              {" "}and acknowledge our{" "}
+              <a href="/privacy" className="underline">Privacy Policy</a>.
+            </p>
+          )}
+
           <button type="submit" className="btn-primary mt-2" disabled={loading}>
             {loading ? "Please wait…" : mode === "signin" ? "Sign in" : "Sign up"}
           </button>
