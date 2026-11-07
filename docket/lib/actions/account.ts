@@ -53,6 +53,5 @@ export async function deleteAccount() {
 
   await supabase.auth.signOut({ scope: "local" });
 
-  revalidatePath("/", "layout");
-  redirect("/");
+  return { success: true };
 }

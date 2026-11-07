@@ -13,10 +13,14 @@ export function DeleteAccountButton() {
 
     startTransition(async () => {
       try {
-        await deleteAccount();
+        const result = await deleteAccount();
+  
+        if (result?.success) {
+            window.location.assign("/");
+        }
       } catch (err) {
         setError(
-          err instanceof Error
+            err instanceof Error
             ? err.message
             : "Something went wrong. Please try again."
         );
