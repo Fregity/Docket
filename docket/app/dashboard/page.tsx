@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { reorderClass } from "@/lib/actions/classes";
-import { bucketForDate, BUCKET_LABELS, type DueBucket } from "@/lib/dates";
 import { AssignmentCard, type AssignmentData } from "@/components/AssignmentCard";
 import { AddHomeworkModal } from "@/components/AddHomeworkModal";
 import { ColorDot, EmptyState, SectionLabel } from "@/components/ui";
 import { NavBar } from "@/components/NavBar";
 import { Greeting } from "@/components/Greeting";
 import TrackPageView from "@/components/TrackPageView";
+import { DashboardAssignments } from "@/components/DashboardAssignments";
 
 export const dynamic = "force-dynamic";
 
@@ -61,11 +61,6 @@ export default async function DashboardPage() {
     }));
   }
 
-  const buckets: DueBucket[] = ["overdue", "today", "tomorrow", "week", "nextweek", "later"];
-  const grouped = buckets.map((b) => ({
-    bucket: b,
-    items: assignments.filter((a) => bucketForDate(a.due_date) === b),
-  }));
 
   const firstName = (profile?.display_name ?? "there").split(" ")[0];
 
@@ -97,26 +92,10 @@ export default async function DashboardPage() {
               </p>
             )}
 
-            {grouped.map(
-              ({ bucket, items }) =>
-                items.length > 0 && (
-                  <section key={bucket}>
-                    <SectionLabel>{BUCKET_LABELS[bucket]}</SectionLabel>
-                    <div className="flex flex-col gap-2.5">
-                      {items.map((a) => (
-                        <AssignmentCard
-                          key={a.id}
-                          assignment={a}
-                          className={a.className}
-                          accentColor={a.accentColor}
-                          showClassName
-                          editableClasses={classes}
-                        />
-                      ))}
-                    </div>
-                  </section>
-                )
-            )}
+            <DashboardAssignments
+              assignments={assignments}
+              editableClasses={classes}
+            />
 
             <div className="flex items-center justify-between mt-8 mb-3">
               <h3 className="font-serif text-lg text-ink">My classes</h3>
