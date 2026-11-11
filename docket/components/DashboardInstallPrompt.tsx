@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import InstallButton from "@/components/InstallButton";
+import { trackEvent } from "@/lib/analytics";
 
 const DISMISS_KEY = "duebird_install_prompt_dismissed_v1";
 
@@ -19,6 +20,7 @@ export function DashboardInstallPrompt() {
 
     if (!standalone && mobile && !localStorage.getItem(DISMISS_KEY)) {
       setVisible(true);
+      void trackEvent("install_prompt_shown");
     }
 
     const onInstalled = () => setVisible(false);
