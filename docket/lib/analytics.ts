@@ -12,7 +12,9 @@ export type AnalyticsEvent =
   | "assignment_created"
   | "assignment_completed"
   | "invite_link_copied"
-  | "dashboard_returned";
+  | "dashboard_returned"
+  | "install_prompt_shown"
+  | "install_prompt_dismissed";
 
 function getOrCreateId(storage: Storage, key: string): string {
   let id = storage.getItem(key);
