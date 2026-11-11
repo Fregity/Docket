@@ -22,6 +22,12 @@ interface AdminAnalytics {
   demo_starts: number;
   demo_completions: number;
   returning_visitors: number;
+  d1_returned: number;
+  d1_eligible: number;
+  d7_returned: number;
+  d7_eligible: number;
+  d30_returned: number;
+  d30_eligible: number;
 }
 
 export default async function AdminPage() {
@@ -75,6 +81,17 @@ export default async function AdminPage() {
   const format = (value: number | undefined) =>
     value !== undefined ? value.toLocaleString("en-US") : "—";
 
+  const formatRetention = (
+    returned: number | undefined,
+    eligible: number | undefined
+  ) => {
+    if (returned === undefined || eligible === undefined) return "—";
+    if (eligible === 0) return "Not enough data";
+
+    return `${((returned / eligible) * 100).toFixed(1)}%`;
+  };
+
+
   const platformStats = [
     {
       label: "Total users",
@@ -118,6 +135,29 @@ export default async function AdminPage() {
       description: "Visitors with multiple events",
     },
   ];
+
+  const retentionStats = [
+    {
+      label: "Day 1",
+      returned: analytics?.d1_returned,
+      eligible: analytics?.d1_eligible,
+      description: "Returned 24–48 hours after signup",
+    },
+    {
+      label: "Day 7",
+      returned: analytics?.d7_returned,
+      eligible: analytics?.d7_eligible,
+      description: "Returned 7–8 days after signup",
+    },
+    {
+      label: "Day 30",
+      returned: analytics?.d30_returned,
+      eligible: analytics?.d30_eligible,
+      description: "Returned 30–31 days after signup",
+    },
+  ];
+
+
 
   const activityStats = [
     {
@@ -247,6 +287,42 @@ export default async function AdminPage() {
 
         <section className="mt-10">
           <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-medium">Signup retention</h2>
+            <span className="text-xs text-muted">
+              Elapsed time after signup
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {retentionStats.map((stat) => (
+              <div
+                key={stat.label}
+                className="rounded-2xl border border-hairline bg-paper p-5"
+              >
+                <p className="text-xs text-muted">{stat.label} retention</p>
+
+                <p className="font-serif text-3xl mt-3 tabular-nums">
+                  {analyticsAvailable
+                    ? formatRetention(stat.returned, stat.eligible)
+                    : "—"}
+                </p>
+
+                <p className="text-xs text-muted mt-2">
+                  {analyticsAvailable
+                    ? `${format(stat.returned)} / ${format(stat.eligible)} eligible users`
+                    : "—"}
+                </p>
+
+                <p className="text-xs text-muted mt-3">
+                  {stat.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-10">
+          <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-medium">Event breakdown</h2>
             <span className="text-xs text-muted">All-time counts</span>
           </div>
@@ -268,9 +344,9 @@ export default async function AdminPage() {
 
         <p className="text-xs text-muted mt-5 leading-relaxed">
           Analytics exclude events associated with the administrator&apos;s
-          user and visitor IDs. Historical events without identifying IDs
-          cannot be reliably attributed. Activity is all-time because
-          event timestamps are not currently stored.
+          user and visitor IDs. Retention uses authenticated user activity.
+          Historical events without timestamps are excluded from retention
+          calculations.
         </p>
 
         <footer className="mt-12 pt-5 border-t border-hairline flex flex-col sm:flex-row justify-between gap-2">
