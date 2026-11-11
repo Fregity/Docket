@@ -8,6 +8,7 @@ import { NavBar } from "@/components/NavBar";
 import { Greeting } from "@/components/Greeting";
 import TrackPageView from "@/components/TrackPageView";
 import { DashboardAssignments } from "@/components/DashboardAssignments";
+import { DashboardInstallPrompt } from "@/components/DashboardInstallPrompt";
 
 export const dynamic = "force-dynamic";
 
@@ -69,6 +70,7 @@ export default async function DashboardPage() {
       <TrackPageView eventName="dashboard_returned" />
       <header className="px-6 pt-10 pb-4 max-w-2xl mx-auto">
         <Greeting firstName={firstName} />
+        <DashboardInstallPrompt />
       </header>
 
       <main className="px-6 max-w-2xl mx-auto">
