@@ -32,6 +32,7 @@ export function DashboardInstallPrompt() {
   function dismiss() {
     localStorage.setItem(DISMISS_KEY, "1");
     setVisible(false);
+    void trackEvent("install_prompt_dismissed");
   }
 
   if (!visible) return null;
