@@ -9,6 +9,12 @@ interface AdminStats {
   total_assignments: number;
 }
 
+interface AdminEngagement {
+  active_users_7d: number;
+  active_users_30d: number;
+  multi_day_returning_users: number;
+}
+
 interface AdminAnalytics {
   total_events: number;
   unique_visitors: number;
@@ -58,10 +64,13 @@ export default async function AdminPage() {
     );
   }
 
-  const [countsResponse, analyticsResponse] = await Promise.all([
-    supabase.rpc("admin_counts").maybeSingle(),
-    supabase.rpc("admin_analytics").maybeSingle(),
-  ]);
+  const [countsResponse, analyticsResponse, engagementResponse] =
+    await Promise.all([
+      supabase.rpc("admin_counts").maybeSingle(),
+      supabase.rpc("admin_analytics").maybeSingle(),
+      supabase.rpc("admin_engagement_metrics").maybeSingle(),
+    ]);
+
 
   if (countsResponse.error) {
     console.error("admin_counts RPC error:", countsResponse.error);
@@ -70,6 +79,15 @@ export default async function AdminPage() {
   if (analyticsResponse.error) {
     console.error("admin_analytics RPC error:", analyticsResponse.error);
   }
+
+  if (engagementResponse.error) {
+    console.error(
+      "admin_engagement_metrics RPC error:",
+      engagementResponse.error
+    );
+  }
+
+  const engagement = engagementResponse.data as AdminEngagement | null;
 
   const result = countsResponse.data as AdminStats | null;
   const analytics = analyticsResponse.data as AdminAnalytics | null;
@@ -320,6 +338,50 @@ export default async function AdminPage() {
             ))}
           </div>
         </section>
+            
+        <section className="mt-10">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-medium">Recent engagement</h2>
+            <span className="text-xs text-muted">
+              Authenticated users, excluding admin
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {[
+              {
+                label: "Active users · 7 days",
+                value: engagement?.active_users_7d,
+                description: "Meaningful activity in the last 7 days",
+              },
+              {
+                label: "Active users · 30 days",
+                value: engagement?.active_users_30d,
+                description: "Meaningful activity in the last 30 days",
+              },
+              {
+                label: "Multi-day returners",
+                value: engagement?.multi_day_returning_users,
+                description: "Activity on at least 2 different days",
+              },
+            ].map((stat) => (
+               <div
+                key={stat.label}
+                className="rounded-2xl border border-hairline bg-paper p-5"
+              >
+                <p className="text-xs text-muted">{stat.label}</p>
+                <p className="font-serif text-3xl mt-3 tabular-nums">
+                  {engagement ? format(stat.value) : "—"}
+                </p>
+                <p className="text-xs text-muted mt-2">
+                  {stat.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+
 
         <section className="mt-10">
           <div className="flex items-center justify-between mb-4">
