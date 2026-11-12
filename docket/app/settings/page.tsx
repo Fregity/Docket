@@ -4,6 +4,7 @@ import { NavBar } from "@/components/NavBar";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import InstallButton from "@/components/InstallButton";
 import { DeleteAccountButton } from "@/components/DeleteAccountButton";
+import { PushNotificationSettings } from "@/components/PushNotificationSettings";
 
 export const dynamic = "force-dynamic";
 
@@ -54,6 +55,8 @@ export default async function SettingsPage() {
         </div>
 
         <ThemeToggle />
+
+        <PushNotificationSettings />
 
         <InstallButton />
 
