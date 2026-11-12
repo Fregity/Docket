@@ -131,7 +131,10 @@ export function PushNotificationSettings({
       const response = await fetch("/api/push/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(subscription),
+        body: JSON.stringify({
+          ...subscription.toJSON(),
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        }),
       });
 
       const result = await response.json();
