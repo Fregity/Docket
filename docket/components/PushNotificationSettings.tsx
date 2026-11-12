@@ -58,13 +58,15 @@ export function PushNotificationSettings({
         const subscription =
           await registration.pushManager.getSubscription();
 
-        if (subscription) {
-          // Make sure the server has the current subscription.
+        if (subscription && Notification.permission === "granted") {
           const response = await fetch("/api/push/subscribe", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({...subscription.toJSON(), timezone: Intl.DateTimeFormat().resolvedOptions().timeZone, }),
-          });
+            body: JSON.stringify({
+            ...subscription.toJSON(),
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            }),
+        });
 
           if (!response.ok) {
             throw new Error("Could not verify notification settings.");
