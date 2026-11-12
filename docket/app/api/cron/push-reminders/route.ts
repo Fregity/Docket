@@ -11,7 +11,7 @@ type Assignment = {
   title: string;
   due_date: string;
   class_id: string;
-  classes: { name: string } | null;
+  classes: { name: string }[] | null;
 };
 
 function localDate(timeZone: string, date = new Date()) {
@@ -243,7 +243,7 @@ export async function GET(request: NextRequest) {
       }
 
       const lines = incomplete.slice(0, 4).map((assignment) => {
-        const className = assignment.classes?.name ?? "Class";
+        const className = assignment.classes?.[0]?.name ?? "Class";
         return `${assignment.title} (${className})`;
       });
 
