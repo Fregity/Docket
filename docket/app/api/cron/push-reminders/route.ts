@@ -83,17 +83,28 @@ export async function GET(request: NextRequest) {
 
   const admin = createAdminClient();
 
-  const { data: users, error: usersError } = await admin
-    .from("profiles")
-    .select("id, timezone")
-    .not("timezone", "is", null);
+  const users: { id: string; timezone: string | null }[] = [];
+  const pageSize = 500;
 
-  if (usersError) {
-    console.error("Could not load users:", usersError);
-    return NextResponse.json(
-      { error: "Could not load users" },
-      { status: 500 }
-    );
+  for (let from = 0; ; from += pageSize) {
+    const { data: page, error } = await admin
+      .from("profiles")
+      .select("id, timezone")
+      .not("timezone", "is", null)
+      .order("id")
+      .range(from, from + pageSize - 1);
+
+    if (error) {
+      console.error("Could not load users:", error);
+      return NextResponse.json(
+        { error: "Could not load users" },
+        { status: 500 }
+      );
+    }
+
+    users.push(...(page ?? []));
+
+    if (!page || page.length < pageSize) break;
   }
 
   let sent = 0;
