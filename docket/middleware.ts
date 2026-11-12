@@ -1,3 +1,4 @@
+
 import { type NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
@@ -21,9 +22,16 @@ function shouldNoIndex(pathname: string) {
 }
 
 export async function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+
+  // The cron endpoint uses its own CRON_SECRET authentication.
+  if (pathname === "/api/cron/push-reminders") {
+    return NextResponse.next();
+  }
+
   const response = await updateSession(request);
 
-  if (shouldNoIndex(request.nextUrl.pathname)) {
+  if (shouldNoIndex(pathname)) {
     response.headers.set(
       "X-Robots-Tag",
       "noindex, nofollow, noarchive"
