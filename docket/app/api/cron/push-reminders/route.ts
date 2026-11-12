@@ -261,6 +261,11 @@ export async function GET(request: NextRequest) {
         return `${assignment.title} (${className})`;
       });
 
+      const extra =
+        incomplete.length > 4
+          ? `, and ${incomplete.length - 4} more`
+          : "";
+
       const payload = JSON.stringify({
         title: reminder.type === "weekly_review"
           ? "Your weekly DueBird review"
