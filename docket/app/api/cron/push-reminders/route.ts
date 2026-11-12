@@ -11,7 +11,14 @@ type Assignment = {
   title: string;
   due_date: string;
   class_id: string;
-  classes: { name: string }[] | null;
+};
+
+type Reminder = {
+  type: "due_today" | "due_tomorrow" | "weekly_review";
+  start: string;
+  end: string;
+  label: string;
+  date: string;
 };
 
 function localDate(timeZone: string, date = new Date()) {
@@ -54,7 +61,10 @@ function localWeekday(timeZone: string) {
 export async function GET(request: NextRequest) {
   const secret = process.env.CRON_SECRET;
 
-  if (!secret || request.headers.get("authorization") !== `Bearer ${secret}`) {
+  if (
+    !secret ||
+    request.headers.get("authorization") !== `Bearer ${secret}`
+  ) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -79,7 +89,11 @@ export async function GET(request: NextRequest) {
     .not("timezone", "is", null);
 
   if (usersError) {
-    return NextResponse.json({ error: "Could not load users" }, { status: 500 });
+    console.error("Could not load users:", usersError);
+    return NextResponse.json(
+      { error: "Could not load users" },
+      { status: 500 }
+    );
   }
 
   let sent = 0;
@@ -89,20 +103,29 @@ export async function GET(request: NextRequest) {
   for (const user of users ?? []) {
     const timezone = user.timezone;
 
-    if (!timezone || localHour(timezone) !== 8) {
+    let hour: number;
+
+    try {
+      if (!timezone) continue;
+      hour = localHour(timezone);
+    } catch (error) {
+      console.error("Invalid user timezone:", {
+        userId: user.id,
+        timezone,
+        error,
+      });
+      continue;
+    }
+
+    // Initial attempt at 8 AM, retries at 9, 10, and 11 AM.
+    if (hour < 8 || hour > 11) {
       continue;
     }
 
     const today = localDate(timezone);
     const tomorrow = addDays(today, 1);
 
-    const reminders: {
-      type: "due_today" | "due_tomorrow" | "weekly_review";
-      start: string;
-      end: string;
-      label: string;
-      date: string;
-    }[] = [
+    const reminders: Reminder[] = [
       {
         type: "due_today",
         start: today,
@@ -134,7 +157,16 @@ export async function GET(request: NextRequest) {
       .select("class_id")
       .eq("user_id", user.id);
 
-    if (membershipError || !memberships?.length) {
+    if (membershipError) {
+      console.error("Could not load class memberships:", {
+        userId: user.id,
+        error: membershipError,
+      });
+      failed++;
+      continue;
+    }
+
+    if (!memberships?.length) {
       continue;
     }
 
@@ -145,11 +177,45 @@ export async function GET(request: NextRequest) {
       .select("endpoint, p256dh, auth")
       .eq("user_id", user.id);
 
-    if (subscriptionError || !subscriptions?.length) {
+    if (subscriptionError) {
+      console.error("Could not load push subscriptions:", {
+        userId: user.id,
+        error: subscriptionError,
+      });
+      failed++;
+      continue;
+    }
+
+    if (!subscriptions?.length) {
       continue;
     }
 
     for (const reminder of reminders) {
+      // Atomically claim this reminder. Failed attempts can be retried;
+      // concurrent requests cannot claim the same reminder simultaneously.
+      const { data: claimed, error: claimError } = await admin.rpc(
+        "claim_push_reminder",
+        {
+          p_user_id: user.id,
+          p_reminder_type: reminder.type,
+          p_reminder_date: reminder.date,
+        }
+      );
+
+      if (claimError) {
+        console.error("Reminder claim failed:", {
+          userId: user.id,
+          reminderType: reminder.type,
+          error: claimError,
+        });
+        failed++;
+        continue;
+      }
+
+      if (!claimed) {
+        skipped++;
+        continue;
+      }
 
       const { data: assignments, error: assignmentError } = await admin
         .from("assignments")
@@ -160,6 +226,12 @@ export async function GET(request: NextRequest) {
         .order("due_date", { ascending: true });
 
       if (assignmentError) {
+        console.error("Could not load assignments:", {
+          userId: user.id,
+          reminderType: reminder.type,
+          error: assignmentError,
+        });
+
         await admin
           .from("push_reminder_logs")
           .update({ status: "failed" })
@@ -171,6 +243,29 @@ export async function GET(request: NextRequest) {
         continue;
       }
 
+      const assignmentIds = (assignments ?? []).map((a) => a.id);
+
+      // No assignments means there is nothing to notify about.
+      if (!assignmentIds.length) {
+        const { error: deleteError } = await admin
+          .from("push_reminder_logs")
+          .delete()
+          .eq("user_id", user.id)
+          .eq("reminder_type", reminder.type)
+          .eq("reminder_date", reminder.date)
+          .eq("status", "pending");
+
+        if (deleteError) {
+          console.error("Could not clear empty reminder claim:", deleteError);
+          failed++;
+        } else {
+          skipped++;
+        }
+
+        continue;
+      }
+
+      // Load class names separately rather than relying on a nested relation.
       const assignmentClassIds = [
         ...new Set((assignments ?? []).map((a) => a.class_id)),
       ];
@@ -181,7 +276,19 @@ export async function GET(request: NextRequest) {
         .in("id", assignmentClassIds);
 
       if (classError) {
-        console.error("Could not load assignment class names:", classError);
+        console.error("Could not load assignment class names:", {
+          userId: user.id,
+          reminderType: reminder.type,
+          error: classError,
+        });
+
+        await admin
+          .from("push_reminder_logs")
+          .update({ status: "failed" })
+          .eq("user_id", user.id)
+          .eq("reminder_type", reminder.type)
+          .eq("reminder_date", reminder.date);
+
         failed++;
         continue;
       }
@@ -190,20 +297,6 @@ export async function GET(request: NextRequest) {
         (classRows ?? []).map((c) => [c.id, c.name])
       );
 
-      const assignmentIds = (assignments ?? []).map((a) => a.id);
-
-      if (!assignmentIds.length) {
-        await admin
-          .from("push_reminder_logs")
-          .update({ status: "sent", sent_at: new Date().toISOString() })
-          .eq("user_id", user.id)
-          .eq("reminder_type", reminder.type)
-          .eq("reminder_date", reminder.date);
-
-        skipped++;
-        continue;
-      }
-
       const { data: completions, error: completionError } = await admin
         .from("assignment_completions")
         .select("assignment_id")
@@ -211,6 +304,12 @@ export async function GET(request: NextRequest) {
         .in("assignment_id", assignmentIds);
 
       if (completionError) {
+        console.error("Could not load assignment completions:", {
+          userId: user.id,
+          reminderType: reminder.type,
+          error: completionError,
+        });
+
         await admin
           .from("push_reminder_logs")
           .update({ status: "failed" })
@@ -231,33 +330,28 @@ export async function GET(request: NextRequest) {
       ) as Assignment[];
 
       if (!incomplete.length) {
-      skipped++;
-      continue;
-      }
+        const { error: deleteError } = await admin
+          .from("push_reminder_logs")
+          .delete()
+          .eq("user_id", user.id)
+          .eq("reminder_type", reminder.type)
+          .eq("reminder_date", reminder.date)
+          .eq("status", "pending");
 
-      // Claim only after confirming there is work to notify about.
-      const { data: claimed, error: claimError } = await admin.rpc(
-      "claim_push_reminder",
-      {
-          p_user_id: user.id,
-          p_reminder_type: reminder.type,
-          p_reminder_date: reminder.date,
-      }
-      );
+        if (deleteError) {
+          console.error("Could not clear completed reminder:", deleteError);
+          failed++;
+        } else {
+          skipped++;
+        }
 
-      if (claimError) {
-      console.error("Reminder claim failed:", claimError);
-      failed++;
-      continue;
-      }
-
-      if (!claimed) {
-      skipped++;
-      continue;
+        continue;
       }
 
       const lines = incomplete.slice(0, 4).map((assignment) => {
-        const className = classNames.get(assignment.class_id) ?? "Unknown class";
+        const className =
+          classNames.get(assignment.class_id) ?? "Unknown class";
+
         return `${assignment.title} (${className})`;
       });
 
@@ -267,11 +361,12 @@ export async function GET(request: NextRequest) {
           : "";
 
       const payload = JSON.stringify({
-        title: reminder.type === "weekly_review"
-          ? "Your weekly DueBird review"
-          : reminder.type === "due_today"
-            ? "Assignments due today"
-            : "Assignments due tomorrow",
+        title:
+          reminder.type === "weekly_review"
+            ? "Your weekly DueBird review"
+            : reminder.type === "due_today"
+              ? "Assignments due today"
+              : "Assignments due tomorrow",
         body: `${lines.join(", ")}${extra}`,
         url: "/dashboard",
         tag: `duebird-${reminder.type}-${reminder.date}`,
@@ -293,6 +388,7 @@ export async function GET(request: NextRequest) {
               },
               payload
             );
+
             deviceSent++;
           } catch (error) {
             const statusCode = (error as { statusCode?: number })?.statusCode;
@@ -300,21 +396,32 @@ export async function GET(request: NextRequest) {
             if (statusCode === 404 || statusCode === 410) {
               staleEndpoints.push(subscription.endpoint);
             } else {
-              console.error("Reminder push failed:", error);
+              console.error("Reminder push failed:", {
+                userId: user.id,
+                reminderType: reminder.type,
+                statusCode,
+                error,
+              });
             }
           }
         })
       );
 
       if (staleEndpoints.length) {
-        await admin
+        const { error: deleteError } = await admin
           .from("push_subscriptions")
           .delete()
           .eq("user_id", user.id)
           .in("endpoint", staleEndpoints);
+
+        if (deleteError) {
+          console.error("Could not remove stale subscriptions:", deleteError);
+        }
       }
 
-      await admin
+      // If at least one device accepted the notification, mark it sent.
+      // This avoids resending to devices that already received it.
+      const { error: logUpdateError } = await admin
         .from("push_reminder_logs")
         .update(
           deviceSent > 0
@@ -325,10 +432,28 @@ export async function GET(request: NextRequest) {
         .eq("reminder_type", reminder.type)
         .eq("reminder_date", reminder.date);
 
-      if (deviceSent > 0) sent++;
-      else failed++;
+      if (logUpdateError) {
+        console.error("Could not update reminder log:", {
+          userId: user.id,
+          reminderType: reminder.type,
+          error: logUpdateError,
+        });
+        failed++;
+        continue;
+      }
+
+      if (deviceSent > 0) {
+        sent++;
+      } else {
+        failed++;
+      }
     }
   }
 
-  return NextResponse.json({ success: true, sent, skipped, failed });
+  return NextResponse.json({
+    success: true,
+    sent,
+    skipped,
+    failed,
+  });
 }
