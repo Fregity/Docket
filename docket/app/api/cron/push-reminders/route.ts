@@ -324,7 +324,7 @@ export async function GET(request: NextRequest) {
           error: classError,
         });
 
-        await markReminderFailed(user.id, reminder, assignmentError);
+        await markReminderFailed(user.id, reminder, classError);
 
         failed++;
         continue;
@@ -347,7 +347,7 @@ export async function GET(request: NextRequest) {
           error: completionError,
         });
 
-        await markReminderFailed(user.id, reminder, assignmentError);
+        await markReminderFailed(user.id, reminder, completionError);
 
         failed++;
         continue;
