@@ -58,6 +58,18 @@ function localWeekday(timeZone: string) {
   }).format(new Date());
 }
 
+
+function errorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  if (typeof error === "string") return error;
+
+  try {
+    return JSON.stringify(error) ?? "Unknown error";
+  } catch {
+    return "Unknown error";
+  }
+}
+
 export async function GET(request: NextRequest) {
   const secret = process.env.CRON_SECRET;
 
@@ -82,6 +94,30 @@ export async function GET(request: NextRequest) {
   webpush.setVapidDetails(subject, publicKey, privateKey);
 
   const admin = createAdminClient();
+
+
+  const markReminderFailed = async (
+    userId: string,
+    reminder: Reminder,
+    error: unknown
+  ) => {
+    const message = errorMessage(error).slice(0, 1000);
+
+    const { error: updateError } = await admin
+      .from("push_reminder_logs")
+      .update({
+        status: "failed",
+        last_error: message,
+      })
+      .eq("user_id", userId)
+      .eq("reminder_type", reminder.type)
+      .eq("reminder_date", reminder.date);
+
+    if (updateError) {
+      console.error("Could not persist reminder failure:", updateError);
+    }
+  };
+
 
   const users: { id: string; timezone: string | null }[] = [];
   const pageSize = 500;
@@ -243,12 +279,7 @@ export async function GET(request: NextRequest) {
           error: assignmentError,
         });
 
-        await admin
-          .from("push_reminder_logs")
-          .update({ status: "failed" })
-          .eq("user_id", user.id)
-          .eq("reminder_type", reminder.type)
-          .eq("reminder_date", reminder.date);
+        await markReminderFailed(user.id, reminder, assignmentError);
 
         failed++;
         continue;
@@ -293,12 +324,7 @@ export async function GET(request: NextRequest) {
           error: classError,
         });
 
-        await admin
-          .from("push_reminder_logs")
-          .update({ status: "failed" })
-          .eq("user_id", user.id)
-          .eq("reminder_type", reminder.type)
-          .eq("reminder_date", reminder.date);
+        await markReminderFailed(user.id, reminder, assignmentError);
 
         failed++;
         continue;
@@ -321,12 +347,7 @@ export async function GET(request: NextRequest) {
           error: completionError,
         });
 
-        await admin
-          .from("push_reminder_logs")
-          .update({ status: "failed" })
-          .eq("user_id", user.id)
-          .eq("reminder_type", reminder.type)
-          .eq("reminder_date", reminder.date);
+        await markReminderFailed(user.id, reminder, assignmentError);
 
         failed++;
         continue;
