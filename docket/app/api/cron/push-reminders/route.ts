@@ -257,11 +257,6 @@ export async function GET(request: NextRequest) {
       }
 
       const lines = incomplete.slice(0, 4).map((assignment) => {
-        const className = assignment.classes?.[0]?.name ?? "Class";
-        return `${assignment.title} (${className})`;
-      });
-
-      const lines = incomplete.slice(0, 4).map((assignment) => {
         const className = classNames.get(assignment.class_id) ?? "Unknown class";
         return `${assignment.title} (${className})`;
       });
