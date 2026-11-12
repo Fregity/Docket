@@ -1,6 +1,6 @@
 
 import { NextRequest, NextResponse } from "next/server";
-import webpush from "web-push";
+import * as webpush from "web-push";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
