@@ -153,7 +153,7 @@ export async function GET(request: NextRequest) {
 
       const { data: assignments, error: assignmentError } = await admin
         .from("assignments")
-        .select("id, title, due_date, class_id, classes(name)")
+        .select("id, title, due_date, class_id")
         .in("class_id", classIds)
         .gte("due_date", reminder.start)
         .lte("due_date", reminder.end)
@@ -170,6 +170,25 @@ export async function GET(request: NextRequest) {
         failed++;
         continue;
       }
+
+      const assignmentClassIds = [
+        ...new Set((assignments ?? []).map((a) => a.class_id)),
+      ];
+
+      const { data: classRows, error: classError } = await admin
+        .from("classes")
+        .select("id, name")
+        .in("id", assignmentClassIds);
+
+      if (classError) {
+        console.error("Could not load assignment class names:", classError);
+        failed++;
+        continue;
+      }
+
+      const classNames = new Map(
+        (classRows ?? []).map((c) => [c.id, c.name])
+      );
 
       const assignmentIds = (assignments ?? []).map((a) => a.id);
 
@@ -242,9 +261,10 @@ export async function GET(request: NextRequest) {
         return `${assignment.title} (${className})`;
       });
 
-      const extra = incomplete.length > 4
-        ? ` and ${incomplete.length - 4} more`
-        : "";
+      const lines = incomplete.slice(0, 4).map((assignment) => {
+        const className = classNames.get(assignment.class_id) ?? "Unknown class";
+        return `${assignment.title} (${className})`;
+      });
 
       const payload = JSON.stringify({
         title: reminder.type === "weekly_review"
