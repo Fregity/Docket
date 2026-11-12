@@ -75,17 +75,6 @@ export function PushNotificationSettings({
 
         setSubscribed(!!subscription);
 
-        if (subscription && Notification.permission === "granted") {
-          void fetch("/api/push/subscribe", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              ...subscription.toJSON(),
-              timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-            }),
-          });
-        }
-
         if (Notification.permission === "denied") {
           setMessage(
             "Notifications are blocked in your browser settings."
