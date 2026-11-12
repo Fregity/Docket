@@ -150,25 +150,6 @@ export async function GET(request: NextRequest) {
     }
 
     for (const reminder of reminders) {
-      // Claim this reminder. The unique constraint prevents duplicate sends.
-      const { error: claimError } = await admin
-        .from("push_reminder_logs")
-        .insert({
-          user_id: user.id,
-          reminder_type: reminder.type,
-          reminder_date: reminder.date,
-          status: "pending",
-        });
-
-      if (claimError) {
-        if (claimError.code === "23505") {
-          skipped++;
-          continue;
-        }
-
-        failed++;
-        continue;
-      }
 
       const { data: assignments, error: assignmentError } = await admin
         .from("assignments")
@@ -231,15 +212,29 @@ export async function GET(request: NextRequest) {
       ) as Assignment[];
 
       if (!incomplete.length) {
-        await admin
-          .from("push_reminder_logs")
-          .update({ status: "sent", sent_at: new Date().toISOString() })
-          .eq("user_id", user.id)
-          .eq("reminder_type", reminder.type)
-          .eq("reminder_date", reminder.date);
+      skipped++;
+      continue;
+      }
 
-        skipped++;
-        continue;
+      // Claim only after confirming there is work to notify about.
+      const { data: claimed, error: claimError } = await admin.rpc(
+      "claim_push_reminder",
+      {
+          p_user_id: user.id,
+          p_reminder_type: reminder.type,
+          p_reminder_date: reminder.date,
+      }
+      );
+
+      if (claimError) {
+      console.error("Reminder claim failed:", claimError);
+      failed++;
+      continue;
+      }
+
+      if (!claimed) {
+      skipped++;
+      continue;
       }
 
       const lines = incomplete.slice(0, 4).map((assignment) => {
