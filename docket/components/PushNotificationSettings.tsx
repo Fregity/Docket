@@ -151,11 +151,25 @@ export function PushNotificationSettings() {
     setMessage("");
 
     try {
-      const response = await fetch("/api/push/test", { method: "POST" });
-      const result = await response.json();
+      const response = await fetch("/api/push/test", {
+        method: "POST",
+      });
+
+      const text = await response.text();
+
+      let result: any;
+      try {
+        result = text ? JSON.parse(text) : {};
+      } catch {
+        throw new Error(
+          `HTTP ${response.status}: Server returned invalid JSON. ${text.slice(0, 300)}`
+        );
+      }
 
       if (!response.ok) {
-        throw new Error(result.error || "Could not send the test notification.");
+        throw new Error(
+          result.error || `Test failed (HTTP ${response.status})`
+        );
       }
 
       setMessage("Test sent. Check your device's notifications.");
