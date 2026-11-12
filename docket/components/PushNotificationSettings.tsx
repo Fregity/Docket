@@ -3,6 +3,12 @@
 
 import { useEffect, useState } from "react";
 
+type Props = {
+  variant?: "settings" | "dashboard";
+};
+
+const DISMISS_KEY = "duebird_push_prompt_dismissed_session";
+
 function decodeVapidKey(base64String: string): Uint8Array {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding)
@@ -13,16 +19,25 @@ function decodeVapidKey(base64String: string): Uint8Array {
   return Uint8Array.from(raw, (char) => char.charCodeAt(0));
 }
 
-export function PushNotificationSettings() {
+export function PushNotificationSettings({
+  variant = "settings",
+}: Props) {
   const [supported, setSupported] = useState(false);
+  const [checked, setChecked] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("Checking notification support...");
 
   useEffect(() => {
+    if (variant === "dashboard") {
+      setDismissed(
+        sessionStorage.getItem(DISMISS_KEY) === "1"
+      );
+    }
+
     async function checkSupport() {
       const available =
-        typeof window !== "undefined" &&
         "serviceWorker" in navigator &&
         "PushManager" in window &&
         "Notification" in window &&
@@ -32,33 +47,63 @@ export function PushNotificationSettings() {
 
       if (!available) {
         setMessage("Push notifications aren't supported by this browser.");
+        setChecked(true);
         return;
       }
 
       try {
-        const registration = await navigator.serviceWorker.register("/sw.js");
-        const subscription = await registration.pushManager.getSubscription();
+        const registration =
+          await navigator.serviceWorker.register("/sw.js");
+
+        const subscription =
+          await registration.pushManager.getSubscription();
+
+        if (subscription) {
+          // Make sure the server has the current subscription.
+          const response = await fetch("/api/push/subscribe", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({...subscription.toJSON(), timezone: Intl.DateTimeFormat().resolvedOptions().timeZone, }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Could not verify notification settings.");
+          }
+        }
 
         setSubscribed(!!subscription);
 
+        if (subscription && Notification.permission === "granted") {
+          void fetch("/api/push/subscribe", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              ...subscription.toJSON(),
+              timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            }),
+          });
+        }
+
         if (Notification.permission === "denied") {
           setMessage(
-            "Notifications are blocked in your browser settings. Change that permission there to enable them."
+            "Notifications are blocked in your browser settings."
           );
         } else {
           setMessage(
             subscription
               ? "Notifications are enabled on this device."
-              : "Get reminders about upcoming assignments."
+              : "Notifications are currently disabled."
           );
         }
       } catch {
-        setMessage("Could not initialize notifications on this device.");
+        setMessage("Could not check notification settings.");
+      } finally {
+        setChecked(true);
       }
     }
 
     void checkSupport();
-  }, []);
+  }, [variant]);
 
   async function enableNotifications() {
     setBusy(true);
@@ -68,18 +113,22 @@ export function PushNotificationSettings() {
       const publicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 
       if (!publicKey) {
-        throw new Error("The public notification key is missing.");
+        throw new Error("Notification configuration is missing.");
       }
 
       const permission = await Notification.requestPermission();
 
       if (permission !== "granted") {
-        throw new Error("Notification permission was not granted.");
+        throw new Error(
+          "Permission wasn't granted. Check your browser settings."
+        );
       }
 
-      const registration = await navigator.serviceWorker.register("/sw.js");
+      const registration =
+        await navigator.serviceWorker.register("/sw.js");
 
-      let subscription = await registration.pushManager.getSubscription();
+      let subscription =
+        await registration.pushManager.getSubscription();
 
       if (!subscription) {
         subscription = await registration.pushManager.subscribe({
@@ -97,14 +146,16 @@ export function PushNotificationSettings() {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || "Could not save your subscription.");
+        throw new Error(result.error || "Could not enable notifications.");
       }
 
       setSubscribed(true);
-      setMessage("Notifications are enabled on this device.");
+      setMessage("Notifications enabled on this device.");
     } catch (error) {
       setMessage(
-        error instanceof Error ? error.message : "Could not enable notifications."
+        error instanceof Error
+          ? error.message
+          : "Could not enable notifications."
       );
     } finally {
       setBusy(false);
@@ -117,7 +168,8 @@ export function PushNotificationSettings() {
 
     try {
       const registration = await navigator.serviceWorker.ready;
-      const subscription = await registration.pushManager.getSubscription();
+      const subscription =
+        await registration.pushManager.getSubscription();
 
       if (subscription) {
         const response = await fetch("/api/push/subscribe", {
@@ -136,50 +188,72 @@ export function PushNotificationSettings() {
       }
 
       setSubscribed(false);
-      setMessage("Notifications are disabled on this device.");
+      setMessage("Notifications disabled on this device.");
     } catch (error) {
       setMessage(
-        error instanceof Error ? error.message : "Could not disable notifications."
+        error instanceof Error
+          ? error.message
+          : "Could not disable notifications."
       );
     } finally {
       setBusy(false);
     }
   }
 
-  async function sendTest() {
-    setBusy(true);
-    setMessage("");
+  function dismissPrompt() {
+    sessionStorage.setItem(DISMISS_KEY, "1");
+    setDismissed(true);
+  }
 
-    try {
-      const response = await fetch("/api/push/test", {
-        method: "POST",
-      });
+  if (variant === "dashboard") {
+    if (!checked || !supported || subscribed || dismissed) return null;
 
-      const text = await response.text();
+    return (
+      <section className="mb-5 rounded-2xl border border-ink/10 bg-paper p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h2 className="font-medium text-ink">
+              Stay on top of assignments
+            </h2>
+            <p className="mt-1 text-sm text-muted">
+              Enable notifications now so you're ready for upcoming
+              assignment reminders.
+            </p>
+          </div>
 
-      let result: any;
-      try {
-        result = text ? JSON.parse(text) : {};
-      } catch {
-        throw new Error(
-          `HTTP ${response.status}: Server returned invalid JSON. ${text.slice(0, 300)}`
-        );
-      }
+          <button
+            type="button"
+            onClick={dismissPrompt}
+            aria-label="Dismiss notification prompt"
+            className="text-muted text-xl leading-none"
+          >
+            ×
+          </button>
+        </div>
 
-      if (!response.ok) {
-        throw new Error(
-          result.error || `Test failed (HTTP ${response.status})`
-        );
-      }
+        {Notification.permission === "denied" ? (
+          <p className="mt-3 text-sm text-muted">
+            Notifications are blocked. You can enable them in your
+            browser settings.
+          </p>
+        ) : (
+          <button
+            type="button"
+            className="btn-secondary mt-3"
+            onClick={enableNotifications}
+            disabled={busy}
+          >
+            {busy ? "Enabling..." : "Enable notifications"}
+          </button>
+        )}
 
-      setMessage("Test sent. Check your device's notifications.");
-    } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "Test notification failed."
-      );
-    } finally {
-      setBusy(false);
-    }
+        {message && (
+          <p className="mt-2 text-xs text-muted" aria-live="polite">
+            {message}
+          </p>
+        )}
+      </section>
+    );
   }
 
   return (
@@ -189,7 +263,7 @@ export function PushNotificationSettings() {
           Push notifications
         </h2>
         <p className="mt-1 text-sm text-ink/60">
-          Receive reminders about upcoming assignments.
+          Enable or disable notifications on this device.
         </p>
       </div>
 
@@ -197,34 +271,26 @@ export function PushNotificationSettings() {
         {message}
       </p>
 
-      {!supported ? null : subscribed ? (
-        <div className="flex flex-wrap gap-2">
+      {supported && checked && (
+        subscribed ? (
           <button
             type="button"
-            className="btn-secondary"
-            onClick={sendTest}
-            disabled={busy}
-          >
-            Send test
-          </button>
-          <button
-            type="button"
-            className="btn-ghost"
+            className="btn-ghost self-start"
             onClick={disableNotifications}
             disabled={busy}
           >
-            Disable
+            {busy ? "Please wait..." : "Disable notifications"}
           </button>
-        </div>
-      ) : (
-        <button
-          type="button"
-          className="btn-secondary self-start"
-          onClick={enableNotifications}
-          disabled={busy}
-        >
-          {busy ? "Please wait..." : "Enable notifications"}
-        </button>
+        ) : (
+          <button
+            type="button"
+            className="btn-secondary self-start"
+            onClick={enableNotifications}
+            disabled={busy || Notification.permission === "denied"}
+          >
+            {busy ? "Please wait..." : "Enable notifications"}
+          </button>
+        )
       )}
     </section>
   );

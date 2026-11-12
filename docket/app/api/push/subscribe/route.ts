@@ -21,12 +21,31 @@ export async function POST(request: NextRequest) {
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-
+  
   let body: any;
   try {
     body = await request.json();
   } catch {
     return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  const timezone = body?.timezone;
+
+  if (typeof timezone !== "string" || timezone.length > 100) {
+    return NextResponse.json(
+      { error: "Invalid timezone" },
+      { status: 400 }
+    );
+  }
+
+  // Validate that this is a real IANA timezone.
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone: timezone });
+  } catch {
+    return NextResponse.json(
+      { error: "Invalid timezone" },
+      { status: 400 }
+    );
   }
 
   const endpoint = body?.endpoint;
@@ -85,6 +104,19 @@ export async function POST(request: NextRequest) {
       status: 500,
     });
   }
+
+  const { error: profileError } = await admin
+    .from("profiles")
+    .update({ timezone })
+    .eq("id", user.id);
+
+  if (profileError) {
+    return NextResponse.json(
+      { error: "Subscription saved, but timezone could not be saved." },
+      { status: 500 }
+    );
+  }
+
 
   return NextResponse.json({ success: true });
 }
