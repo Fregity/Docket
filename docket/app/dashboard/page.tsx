@@ -21,11 +21,17 @@ export default async function DashboardPage() {
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const { data: profile } = await supabase
+  const { data: profile, error: profileError } = await supabase
     .from("profiles")
     .select("display_name, onboarding_completed")
     .eq("id", user.id)
     .single();
+
+  console.log("ONBOARDING DEBUG:", {
+    userId: user.id,
+    profile,
+    profileError,
+  });
 
   const { data: memberships } = await supabase
     .from("class_members")
@@ -45,7 +51,8 @@ export default async function DashboardPage() {
     const { count } = await supabase
       .from("assignments")
       .select("id", { count: "exact", head: true })
-      .in("class_id", classIds);
+      .in("class_id", classIds)
+      .eq("created_by", user.id);
 
     assignmentCount = count ?? 0;
   }
