@@ -10,6 +10,7 @@ import TrackPageView from "@/components/TrackPageView";
 import { DashboardAssignments } from "@/components/DashboardAssignments";
 import { DashboardInstallPrompt } from "@/components/DashboardInstallPrompt";
 import { PushNotificationSettings } from "@/components/PushNotificationSettings";
+import { DashboardOnboarding } from "@/components/DashboardOnboarding";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +23,7 @@ export default async function DashboardPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("display_name")
+    .select("display_name, onboarding_completed")
     .eq("id", user.id)
     .single();
 
@@ -37,6 +38,17 @@ export default async function DashboardPage() {
     .filter(Boolean) as { id: string; name: string; accent_color: string }[];
 
   const classIds = classes.map((c) => c.id);
+
+  let assignmentCount = 0;
+
+  if (classIds.length > 0) {
+    const { count } = await supabase
+      .from("assignments")
+      .select("id", { count: "exact", head: true })
+      .in("class_id", classIds);
+
+    assignmentCount = count ?? 0;
+  }
 
   let assignments: (AssignmentData & { className: string; accentColor: string })[] = [];
 
@@ -71,8 +83,13 @@ export default async function DashboardPage() {
       <TrackPageView eventName="dashboard_returned" />
       <header className="px-6 pt-10 pb-4 max-w-2xl mx-auto">
         <Greeting firstName={firstName} />
-        <PushNotificationSettings variant="dashboard" />
-        <DashboardInstallPrompt />
+
+        {profile?.onboarding_completed !== false && (
+          <>
+            <PushNotificationSettings variant="dashboard" />
+            <DashboardInstallPrompt />
+          </>
+        )}
       </header>
 
       <main className="px-6 max-w-2xl mx-auto">
@@ -153,6 +170,12 @@ export default async function DashboardPage() {
       )}
 
       <NavBar />
+      {profile?.onboarding_completed === false && (
+        <DashboardOnboarding
+          classes={classes}
+          hasAssignments={assignmentCount > 0}
+        />
+      )}
     </div>
   );
 }

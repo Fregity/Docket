@@ -39,8 +39,19 @@ export async function createClass(input: {
     console.error("Failed to track class_created:", analyticsError.message);
   }
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("onboarding_completed")
+    .eq("id", user.id)
+    .single();
+
   revalidatePath("/dashboard");
   revalidatePath("/classes");
+
+  if (profile?.onboarding_completed === false) {
+    redirect("/dashboard");
+  }
+
   redirect(`/classes/${newClass.id}?invite=1`);
 }
 
@@ -88,8 +99,19 @@ export async function joinClassByCode(code: string, skipOnboarding = false) {
   }
 
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("onboarding_completed")
+    .eq("id", user.id)
+    .single();
+
   revalidatePath("/dashboard");
   revalidatePath("/classes");
+
+  if (profile?.onboarding_completed === false) {
+    redirect("/dashboard");
+  }
+
   redirect(`/classes/${joinedClass.id}`);
 }
 
