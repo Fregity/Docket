@@ -100,8 +100,20 @@ export default async function DashboardPage() {
       </header>
 
       <main className="px-6 max-w-2xl mx-auto">
-        <div className="fixed top-20 left-4 z-[9999] bg-red-600 p-4 text-white">
-          DEBUG: onboarding_completed = {String(profile?.onboarding_completed)}
+        <div className="fixed top-20 left-4 z-[9999] max-w-sm bg-red-600 p-4 text-white text-xs">
+          <pre>
+            {JSON.stringify({
+              profile,
+              profileError: profileError
+                ? {
+                    code: profileError.code,
+                    message: profileError.message,
+                    details: profileError.details,
+                    hint: profileError.hint,
+                  }
+                : null,
+            }, null, 2)}
+          </pre>
         </div>
         {classes.length === 0 ? (
           <EmptyState
