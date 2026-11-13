@@ -29,8 +29,9 @@ export function DashboardInstallPrompt() {
     }
 
     const onInstalled = () => {
-      setVisible(false);
       localStorage.setItem(DISMISS_KEY, "1");
+      setVisible(false);
+      notifyInstallPromptClosed();
     };
 
     window.addEventListener("appinstalled", onInstalled);
@@ -43,7 +44,14 @@ export function DashboardInstallPrompt() {
   function dismiss() {
     localStorage.setItem(DISMISS_KEY, "1");
     setVisible(false);
+    notifyInstallPromptClosed();
     void trackEvent("install_prompt_dismissed");
+  }
+
+  function notifyInstallPromptClosed() {
+    window.dispatchEvent(
+      new Event("duebird:install-prompt-closed")
+    );
   }
 
   if (!visible) return null;
