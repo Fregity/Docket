@@ -406,6 +406,7 @@ export async function GET(request: NextRequest) {
 
       let deviceSent = 0;
       const staleEndpoints: string[] = [];
+      const pushErrors: string[] = [];
 
       await Promise.all(
         subscriptions.map(async (subscription) => {
@@ -428,6 +429,11 @@ export async function GET(request: NextRequest) {
             if (statusCode === 404 || statusCode === 410) {
               staleEndpoints.push(subscription.endpoint);
             } else {
+              const message = errorMessage(error);
+              pushErrors.push(
+                `${statusCode ?? "unknown"}: ${message}`.slice(0, 500)
+              );
+
               console.error("Reminder push failed:", {
                 userId: user.id,
                 reminderType: reminder.type,
@@ -457,8 +463,19 @@ export async function GET(request: NextRequest) {
         .from("push_reminder_logs")
         .update(
           deviceSent > 0
-            ? { status: "sent", sent_at: new Date().toISOString() }
-            : { status: "failed" }
+            ? {
+                status: "sent",
+                sent_at: new Date().toISOString(),
+                last_error: pushErrors.length
+                ? pushErrors.join(" | ").slice(0, 1000)
+                : null,
+            }
+            : {
+                status: "failed",
+                last_error: pushErrors.length
+                ? pushErrors.join(" | ").slice(0, 1000)
+                : "All push delivery attempts failed",
+            }
         )
         .eq("user_id", user.id)
         .eq("reminder_type", reminder.type)
