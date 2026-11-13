@@ -8,6 +8,7 @@ type Props = {
 };
 
 const DISMISS_KEY = "duebird_push_prompt_dismissed_session";
+const INSTALL_DISMISS_KEY = "duebird_install_prompt_dismissed_v1";
 
 function decodeVapidKey(base64String: string): Uint8Array {
   const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
@@ -19,6 +20,20 @@ function decodeVapidKey(base64String: string): Uint8Array {
   return Uint8Array.from(raw, (char) => char.charCodeAt(0));
 }
 
+function isStandalone() {
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    (navigator as Navigator & { standalone?: boolean }).standalone === true
+  );
+}
+
+function isMobile() {
+  return (
+    /android|iphone|ipad|ipod/i.test(navigator.userAgent) ||
+    (navigator.userAgent.includes("Mac") && navigator.maxTouchPoints > 1)
+  );
+}
+
 export function PushNotificationSettings({
   variant = "settings",
 }: Props) {
@@ -26,17 +41,104 @@ export function PushNotificationSettings({
   const [checked, setChecked] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
   const [dismissed, setDismissed] = useState(false);
+  const [installFinished, setInstallFinished] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("Checking notification support...");
 
   useEffect(() => {
     if (variant === "dashboard") {
-      setDismissed(
-        sessionStorage.getItem(DISMISS_KEY) === "1"
+      setDismissed(sessionStorage.getItem(DISMISS_KEY) === "1");
+
+      const installAlreadyHandled =
+        localStorage.getItem(INSTALL_DISMISS_KEY) === "1" ||
+        isStandalone() ||
+        !isMobile();
+
+      setInstallFinished(installAlreadyHandled);
+
+      const onInstallPromptClosed = () => setInstallFinished(true);
+
+      window.addEventListener(
+        "duebird:install-prompt-closed",
+        onInstallPromptClosed
       );
+
+      // If the install prompt was already dismissed in a previous session,
+      // don't make the user wait for an event that won't happen.
+      if (installAlreadyHandled) {
+        setInstallFinished(true);
+      }
+
+      async function checkSupport() {
+        const available =
+          "serviceWorker" in navigator &&
+          "PushManager" in window &&
+          "Notification" in window &&
+          window.isSecureContext;
+
+        setSupported(available);
+
+        if (!available) {
+          setMessage("Push notifications aren't supported by this browser.");
+          setChecked(true);
+          return;
+        }
+
+        try {
+          const registration =
+            await navigator.serviceWorker.register("/sw.js");
+
+          const subscription =
+            await registration.pushManager.getSubscription();
+
+          if (subscription && Notification.permission === "granted") {
+            const response = await fetch("/api/push/subscribe", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                ...subscription.toJSON(),
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+              }),
+            });
+
+            if (!response.ok) {
+              throw new Error("Could not verify notification settings.");
+            }
+          }
+
+          setSubscribed(
+            !!subscription && Notification.permission === "granted"
+          );
+
+          if (Notification.permission === "denied") {
+            setMessage(
+              "Notifications are blocked in your browser settings."
+            );
+          } else {
+            setMessage(
+              subscription
+                ? "Notifications are enabled on this device."
+                : "Notifications are currently disabled."
+            );
+          }
+        } catch {
+          setMessage("Could not check notification settings.");
+        } finally {
+          setChecked(true);
+        }
+      }
+
+      void checkSupport();
+
+      return () => {
+        window.removeEventListener(
+          "duebird:install-prompt-closed",
+          onInstallPromptClosed
+        );
+      };
     }
 
-    async function checkSupport() {
+    async function checkSettingsSupport() {
       const available =
         "serviceWorker" in navigator &&
         "PushManager" in window &&
@@ -63,22 +165,22 @@ export function PushNotificationSettings({
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-            ...subscription.toJSON(),
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+              ...subscription.toJSON(),
+              timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
             }),
-        });
+          });
 
           if (!response.ok) {
             throw new Error("Could not verify notification settings.");
           }
         }
 
-        setSubscribed(!!subscription);
+        setSubscribed(
+          !!subscription && Notification.permission === "granted"
+        );
 
         if (Notification.permission === "denied") {
-          setMessage(
-            "Notifications are blocked in your browser settings."
-          );
+          setMessage("Notifications are blocked in your browser settings.");
         } else {
           setMessage(
             subscription
@@ -93,7 +195,7 @@ export function PushNotificationSettings({
       }
     }
 
-    void checkSupport();
+    void checkSettingsSupport();
   }, [variant]);
 
   async function enableNotifications() {
@@ -200,53 +302,97 @@ export function PushNotificationSettings({
   }
 
   if (variant === "dashboard") {
-    if (!checked || !supported || subscribed || dismissed) return null;
+    if (
+      !checked ||
+      !supported ||
+      subscribed ||
+      dismissed ||
+      !installFinished
+    ) {
+      return null;
+    }
 
     return (
-      <section className="mb-5 rounded-2xl border border-ink/10 bg-paper p-4">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h2 className="font-medium text-ink">
-              Stay on top of assignments
-            </h2>
-            <p className="mt-1 text-sm text-muted">
-              Enable notifications now so you're ready for upcoming
-              assignment reminders.
-            </p>
-          </div>
-
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 px-5 py-8 backdrop-blur-md">
+        <section
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="notification-modal-title"
+          className="relative w-full max-w-sm rounded-3xl border border-ink/10 bg-paper p-7 shadow-2xl animate-in fade-in zoom-in-95 duration-200"
+        >
           <button
             type="button"
             onClick={dismissPrompt}
             aria-label="Dismiss notification prompt"
-            className="text-muted text-xl leading-none"
+            className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full text-xl text-muted transition hover:bg-ink/5 hover:text-ink"
           >
             ×
           </button>
-        </div>
 
-        {Notification.permission === "denied" ? (
-          <p className="mt-3 text-sm text-muted">
-            Notifications are blocked. You can enable them in your
-            browser settings.
+          <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-ink/5 text-ink">
+            <svg
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+              <path d="M10 21h4" />
+            </svg>
+          </div>
+
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted">
+            Never miss a deadline
           </p>
-        ) : (
+
+          <h2
+            id="notification-modal-title"
+            className="font-serif text-2xl leading-tight text-ink"
+          >
+            Let DueBird remind you.
+          </h2>
+
+          <p className="mt-3 text-sm leading-relaxed text-muted">
+            Get helpful reminders about upcoming assignments, so important
+            deadlines don't sneak up on you.
+          </p>
+
+          {Notification.permission === "denied" ? (
+            <p className="mt-5 rounded-xl bg-ink/5 p-3 text-sm text-muted">
+              Notifications are blocked by your browser. You can enable them
+              in your device or browser settings.
+            </p>
+          ) : (
+            <button
+              type="button"
+              className="btn-primary mt-6 w-full justify-center"
+              onClick={enableNotifications}
+              disabled={busy}
+            >
+              {busy ? "Enabling..." : "Enable notifications"}
+            </button>
+          )}
+
+          {message && (
+            <p className="mt-3 text-center text-xs text-muted" aria-live="polite">
+              {message}
+            </p>
+          )}
+
           <button
             type="button"
-            className="btn-secondary mt-3"
-            onClick={enableNotifications}
-            disabled={busy}
+            onClick={dismissPrompt}
+            className="mt-4 w-full py-2 text-sm text-muted transition hover:text-ink"
           >
-            {busy ? "Enabling..." : "Enable notifications"}
+            Maybe later
           </button>
-        )}
-
-        {message && (
-          <p className="mt-2 text-xs text-muted" aria-live="polite">
-            {message}
-          </p>
-        )}
-      </section>
+        </section>
+      </div>
     );
   }
 
