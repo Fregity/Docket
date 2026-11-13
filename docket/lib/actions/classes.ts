@@ -44,7 +44,7 @@ export async function createClass(input: {
   redirect(`/classes/${newClass.id}?invite=1`);
 }
 
-export async function joinClassByCode(code: string) {
+export async function joinClassByCode(code: string, skipOnboarding = false) {
   const supabase = await createClient();
 
   const {
@@ -63,6 +63,17 @@ export async function joinClassByCode(code: string) {
   }
   if (error || !joinedClass?.id) {
     throw new Error("This invite link isn't valid.");
+  }
+  
+  if (skipOnboarding) {
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .update({ onboarding_completed: true })
+      .eq("id", user.id);
+
+    if (profileError) {
+      console.error("Failed to complete onboarding:", profileError.message);
+    }
   }
 
   const { error: analyticsError } = await supabase

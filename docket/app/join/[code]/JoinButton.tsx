@@ -13,7 +13,7 @@ export function JoinButton({ code }: { code: string }) {
     setError(null);
     startTransition(async () => {
       try {
-        await joinClassByCode(code);
+        await joinClassByCode(code, true);
       } catch (err) {
         // 2. Use isRedirectError to let the redirect signal propagate
         if (isRedirectError(err)) {

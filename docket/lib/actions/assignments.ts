@@ -70,6 +70,18 @@ export async function addAssignment(input: {
     ];
   }
 
+  const { error: onboardingError } = await supabase
+    .from("profiles")
+    .update({ onboarding_completed: true })
+    .eq("id", user.id);
+
+  if (onboardingError) {
+    console.error(
+      "Failed to complete onboarding:",
+      onboardingError.message
+    );
+  }
+
   const { error } = await supabase.from("assignments").insert(rows);
 
   if (error) throw new Error("Couldn't save that assignment. Try again.");
