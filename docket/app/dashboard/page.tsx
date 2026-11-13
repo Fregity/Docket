@@ -100,6 +100,9 @@ export default async function DashboardPage() {
       </header>
 
       <main className="px-6 max-w-2xl mx-auto">
+        <div className="fixed top-20 left-4 z-[9999] bg-red-600 p-4 text-white">
+          DEBUG: onboarding_completed = {String(profile?.onboarding_completed)}
+        </div>
         {classes.length === 0 ? (
           <EmptyState
             title="No classes yet"
