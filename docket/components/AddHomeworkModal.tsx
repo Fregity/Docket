@@ -184,7 +184,7 @@ export function AddHomeworkModal({
 
   const modalContent = open && (
     <div
-      className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-ink/30 animate-fade-in"
+      className="fixed inset-0 z-[130] flex items-end sm:items-center justify-center bg-ink/30 animate-fade-in"
       onClick={close}
     >
       <form
