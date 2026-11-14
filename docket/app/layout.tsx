@@ -16,11 +16,11 @@ const serif = Fraunces({
 export const metadata: Metadata = {
   metadataBase: new URL("https://myduebird.com"),
   title: {
-    default: "DueBird — Homework tracker for students",
+    default: "DueBird — Free Homework Planner for Students",
     template: "%s | DueBird",
   },
   description:
-    "Keep your homework organized. Add assignments, see what's due, and share classwork with friends using DueBird.",
+    "Organize classes, homework assignments, and due dates in one place with DueBird, a free homework planner built for students.",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -33,16 +33,25 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: "DueBird",
-    title: "DueBird — Homework tracker for students",
+    title: "DueBird — Free Homework Planner for Students",
     description:
-      "Keep your homework organized. Add assignments, see what's due, and share classwork with friends.",
+      "Organize classes, homework assignments, and due dates in one place with a free planner built for students.",
     url: "https://myduebird.com",
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "DueBird — Free Homework Planner for Students",
+      },
+    ],
   },
   twitter: {
-    card: "summary",
-    title: "DueBird — Homework tracker for students",
+    card: "summary_large_image",
+    title: "DueBird — Free Homework Planner for Students",
     description:
-      "Keep your homework organized. Add assignments, see what's due, and share classwork with friends.",
+      "Organize classes, homework assignments, and due dates in one place with a free planner built for students.",
+    images: ["/opengraph-image"],
   },
 };
 

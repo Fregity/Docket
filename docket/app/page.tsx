@@ -1,21 +1,28 @@
-
 import type { Metadata } from "next";
 import Link from "next/link";
 import TrackPageView from "@/components/TrackPageView";
 
 export const metadata: Metadata = {
-  title: "Homework tracker for students",
+  title: "Free Homework Planner for Students",
   description:
-    "What did we have for homework? Keep assignments organized, see what's due, and share classes with friends using DueBird.",
+    "DueBird is a free homework planner that helps students organize classes, track assignments, and remember due dates in one place.",
   alternates: {
     canonical: "/",
   },
   openGraph: {
-    title: "Homework tracker for students | DueBird",
+    title: "DueBird - Free Homework Planner for Students",
     description:
-      "Keep your classes' homework in one place. Add assignments, see what's due, and share your class with friends.",
+      "Organize classes, track homework assignments, and keep due dates in one place with DueBird.",
     url: "https://myduebird.com",
     type: "website",
+    images: ["/opengraph-image"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "DueBird - Free Homework Planner for Students",
+    description:
+      "Organize classes, track homework assignments, and keep due dates in one place with DueBird.",
+    images: ["/opengraph-image"],
   },
 };
 
@@ -23,11 +30,12 @@ const structuredData = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
   name: "DueBird",
-  applicationCategory: "Education",
+  applicationCategory: "EducationalApplication",
   operatingSystem: "Web",
   url: "https://myduebird.com",
   description:
-    "A homework tracker for students to organize assignments, see upcoming due dates, and share classes with friends.",
+    "A free homework planner for students to organize classes, track assignments, see upcoming due dates, and share classwork with classmates.",
+  isAccessibleForFree: true,
 };
 
 export default function LandingPage() {
@@ -83,7 +91,67 @@ export default function LandingPage() {
         </p>
       </section>
 
-      <footer className="text-center pb-4 sm:pb-7 text-xs text-faint">
+      <section className="w-full bg-wash/50 border-y border-hairline px-6 py-16 sm:py-20">
+        <div className="max-w-5xl mx-auto">
+          <div className="max-w-2xl mx-auto text-center">
+            <p className="text-xs uppercase tracking-[0.18em] text-muted mb-3">
+              A simpler way to stay organized
+            </p>
+            <h2 className="font-serif text-3xl sm:text-4xl text-ink">
+              A homework planner built around how students actually work.
+            </h2>
+            <p className="mt-4 text-sm sm:text-base leading-relaxed text-muted">
+              DueBird is a free online homework planner for keeping track of
+              classes, assignments, and upcoming due dates. Instead of
+              searching through messages to remember what was assigned, keep
+              classwork organized in one shared place.
+            </p>
+          </div>
+
+          <div className="grid gap-5 sm:grid-cols-3 mt-12">
+            <article className="rounded-2xl border border-hairline bg-paper p-6">
+              <h3 className="font-serif text-xl text-ink">Organize every class</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted">
+                Keep each course separate so assignments are easier to find
+                and your workload is easier to understand.
+              </p>
+            </article>
+            <article className="rounded-2xl border border-hairline bg-paper p-6">
+              <h3 className="font-serif text-xl text-ink">Track assignments</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted">
+                Add homework, descriptions, and due dates, then see upcoming
+                work together on your dashboard.
+              </p>
+            </article>
+            <article className="rounded-2xl border border-hairline bg-paper p-6">
+              <h3 className="font-serif text-xl text-ink">Share classwork</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted">
+                Create a class or join one with classmates so everyone can
+                keep up with the work assigned to the group.
+              </p>
+            </article>
+          </div>
+
+          <div className="max-w-2xl mx-auto text-center mt-14">
+            <h2 className="font-serif text-2xl sm:text-3xl text-ink">
+              Spend less time figuring out what’s due.
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed text-muted">
+              Whether you call it a homework tracker, student planner, or
+              assignment organizer, DueBird gives your schoolwork one place
+              to live. It’s free to use and designed for students.
+            </p>
+            <Link
+              href="/demo"
+              className="btn-primary inline-flex justify-center mt-7 px-8 py-3"
+            >
+              Explore the demo
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      <footer className="text-center py-6 px-6 text-xs text-faint">
         Made for students, by students.
       </footer>
     </main>
