@@ -44,7 +44,7 @@ export default async function ClassesPage() {
             Join
           </Link>
           <Link
-            href="/classes/new"
+            href="/classes/new?returnTo=%2Fclasses"
             className="inline-flex min-h-11 items-center text-sm text-ink underline underline-offset-2"
           >
             + New
@@ -58,7 +58,7 @@ export default async function ClassesPage() {
             title="No classes yet"
             body="Create a class or join one with an invite link."
           >
-            <Link href="/classes/new" className="btn-primary">
+            <Link href="/classes/new?returnTo=%2Fclasses" className="btn-primary">
               Create a class
             </Link>
             <Link href="/onboarding?intent=join" className="btn-secondary">

@@ -19,15 +19,15 @@ export default function NewClassPage() {
   function dismiss() {
     if (pending) return;
 
-    // Return to the previous in-app page when possible.
-    if (
-      window.history.length > 1 &&
-      document.referrer.startsWith(window.location.origin)
-    ) {
-      router.back();
-    } else {
-      router.replace("/classes");
-    }
+    const params = new URLSearchParams(window.location.search);
+    const requestedPath = params.get("returnTo");
+
+    const returnTo =
+      requestedPath === "/dashboard" || requestedPath === "/classes"
+        ? requestedPath
+        : "/classes";
+
+    router.replace(returnTo);
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -46,7 +46,7 @@ export default function NewClassPage() {
 
   return (
     <div
-      className="fixed inset-0 z-[120] flex items-end justify-center overflow-y-auto bg-ink/35 px-0 pt-[env(safe-area-inset-top)] sm:items-center sm:px-4 sm:py-6"
+      className="fixed inset-0 z-[120] flex items-end justify-center overflow-y-auto bg-transparent px-0 pt-[env(safe-area-inset-top)] sm:items-center sm:px-4 sm:py-6"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) dismiss();
       }}

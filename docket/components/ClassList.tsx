@@ -1,7 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, useTransition } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import { reorderClass } from "@/lib/actions/classes";
 import { ColorDot } from "@/components/ui";
 
@@ -21,6 +27,36 @@ export function ClassList({
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
+  const itemRefs = useRef(new Map<string, HTMLDivElement>());
+  const previousPositions = useRef(new Map<string, number>());
+
+  useLayoutEffect(() => {
+    const elements = itemRefs.current;
+    const oldPositions = previousPositions.current;
+
+    if (oldPositions.size === 0) return;
+
+    elements.forEach((element, id) => {
+      const oldTop = oldPositions.get(id);
+      if (oldTop === undefined) return;
+
+      const newTop = element.getBoundingClientRect().top;
+      const delta = oldTop - newTop;
+
+      if (delta === 0) return;
+ 
+      element.style.transition = "none";
+      element.style.transform = `translateY(${delta}px)`;
+
+      requestAnimationFrame(() => {
+        element.style.transition = "transform 220ms cubic-bezier(0.2, 0, 0, 1)";
+        element.style.transform = "translateY(0)";
+      });
+    });
+
+    previousPositions.current.clear();
+  }, [classes]);
+
   useEffect(() => {
     setClasses(initialClasses);
   }, [initialClasses]);
@@ -34,24 +70,31 @@ export function ClassList({
     const previous = classes;
     const next = [...classes];
 
+    itemRefs.current.forEach((element, id) => {
+        previousPositions.current.set(
+        id,
+        element.getBoundingClientRect().top
+        );
+    });
+
     [next[index], next[target]] = [next[target], next[index]];
 
     setClasses(next);
     setError(null);
 
     startTransition(async () => {
-      try {
+        try {
         await reorderClass(previous[index].id, direction);
-      } catch (err) {
+        } catch (err) {
         setClasses(previous);
         setError(
-          err instanceof Error
+            err instanceof Error
             ? err.message
             : "Couldn't reorder your classes."
         );
-      }
+        }
     });
-  }
+    }
 
   return (
     <>
@@ -59,6 +102,13 @@ export function ClassList({
         {classes.map((cls, index) => (
           <div
             key={cls.id}
+            ref={(element) => {
+                if (element) {
+                itemRefs.current.set(cls.id, element);
+                } else {
+                itemRefs.current.delete(cls.id);
+                }
+            }}
             className="card flex min-w-0 items-center gap-3"
           >
             <Link

@@ -118,7 +118,7 @@ export default async function DashboardPage() {
             title="No classes yet"
             body="Create a class or join one with an invite link."
           >
-            <Link href="/classes/new" className="btn-primary">
+            <Link href="/classes/new?returnTo=%2Fdashboard" className="btn-primary">
               Create a class
             </Link>
             <Link href="/onboarding?intent=join" className="btn-secondary">
@@ -151,7 +151,7 @@ export default async function DashboardPage() {
             <ClassList classes={classes} />
 
             <Link
-              href="/classes/new"
+              href="/classes/new?returnTo=%2Fdashboard"
               className="mt-3 inline-flex min-h-11 items-center text-sm text-muted underline underline-offset-2"
             >
               + New class
