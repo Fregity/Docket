@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { reorderClass } from "@/lib/actions/classes";
-import { ColorDot, EmptyState, SectionLabel } from "@/components/ui";
+import { EmptyState, SectionLabel } from "@/components/ui";
+import { ClassList } from "@/components/ClassList";
 import { NavBar } from "@/components/NavBar";
 
 export const dynamic = "force-dynamic";
@@ -67,53 +67,8 @@ export default async function ClassesPage() {
           </EmptyState>
         ) : (
           <>
-            <SectionLabel>Your classes</SectionLabel>
-            <div className="flex flex-col gap-2">
-              {classes.map((cls, index) => (
-                <div
-                  key={cls.id}
-                  className="card flex min-w-0 items-center gap-3"
-                >
-                  <Link
-                    href={`/classes/${cls.id}`}
-                    className="flex min-h-11 min-w-0 flex-1 items-center gap-3"
-                  >
-                    <ColorDot colorId={cls.accent_color} size={10} />
-                    <div className="min-w-0">
-                      <p className="truncate text-[15px]">{cls.name}</p>
-                      {cls.period && (
-                        <p className="text-xs text-muted">
-                          Period {cls.period}
-                        </p>
-                      )}
-                    </div>
-                  </Link>
-
-                  <div className="flex shrink-0 items-center">
-                    <form action={reorderClass.bind(null, cls.id, "up")}>
-                      <button
-                        type="submit"
-                        disabled={index === 0}
-                        aria-label={`Move ${cls.name} up`}
-                        className="flex h-10 w-10 items-center justify-center rounded-lg text-faint transition-colors hover:bg-wash hover:text-ink disabled:opacity-30"
-                      >
-                        ▲
-                      </button>
-                    </form>
-                    <form action={reorderClass.bind(null, cls.id, "down")}>
-                      <button
-                        type="submit"
-                        disabled={index === classes.length - 1}
-                        aria-label={`Move ${cls.name} down`}
-                        className="flex h-10 w-10 items-center justify-center rounded-lg text-faint transition-colors hover:bg-wash hover:text-ink disabled:opacity-30"
-                      >
-                        ▼
-                      </button>
-                    </form>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <SectionLabel>Your classes</SectionLabel>       
+            <ClassList classes={classes} />
           </>
         )}
       </main>

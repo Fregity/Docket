@@ -153,32 +153,61 @@ export async function leaveClass(classId: string) {
   redirect("/classes");
 }
 
-export async function reorderClass(classId: string, direction: "up" | "down") {
+export async function reorderClass(
+  classId: string,
+  direction: "up" | "down"
+) {
   const supabase = await createClient();
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return;
 
-  const { data: memberships } = await supabase
+  if (!user) throw new Error("not_authenticated");
+
+  const { data: memberships, error: fetchError } = await supabase
     .from("class_members")
     .select("id, class_id, position")
     .eq("user_id", user.id)
     .order("position", { ascending: true });
 
-  if (!memberships) return;
+  if (fetchError || !memberships) {
+    throw new Error("Couldn't load your class order.");
+  }
 
-  const index = memberships.findIndex((m) => m.class_id === classId);
-  if (index === -1) return;
+  const index = memberships.findIndex(
+    (membership) => membership.class_id === classId
+  );
+
+  if (index === -1) throw new Error("Class not found.");
 
   const swapIndex = direction === "up" ? index - 1 : index + 1;
+
   if (swapIndex < 0 || swapIndex >= memberships.length) return;
 
   const current = memberships[index];
   const swap = memberships[swapIndex];
 
-  await supabase.from("class_members").update({ position: swap.position }).eq("id", current.id);
-  await supabase.from("class_members").update({ position: current.position }).eq("id", swap.id);
+  const { error: firstError } = await supabase
+    .from("class_members")
+    .update({ position: swap.position })
+    .eq("id", current.id);
+
+  if (firstError) throw new Error("Couldn't update class order.");
+
+  const { error: secondError } = await supabase
+    .from("class_members")
+    .update({ position: current.position })
+    .eq("id", swap.id);
+
+  if (secondError) {
+    await supabase
+      .from("class_members")
+      .update({ position: current.position })
+      .eq("id", current.id);
+
+    throw new Error("Couldn't update class order.");
+  }
 
   revalidatePath("/dashboard");
   revalidatePath("/classes");

@@ -2,13 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import {
-  toggleAssignmentComplete,
-  deleteAssignment,
-} from "@/lib/actions/assignments";
+import { toggleAssignmentComplete, deleteAssignment, } from "@/lib/actions/assignments";
 import { relativeDueLabel } from "@/lib/dates";
 import { ColorDot } from "@/components/ui";
 import { AddHomeworkModal } from "@/components/AddHomeworkModal";
+import Link from "next/link";
 
 export type AssignmentData = {
   id: string;
@@ -241,7 +239,10 @@ export function AssignmentCard({
         </button>
       )}
 
-      <div className="min-w-0 flex-1">
+      <Link
+        href={`/classes/${assignment.class_id}`}
+        className="min-w-0 flex-1 rounded-md outline-offset-2 hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-ink"
+      >
         {showClassName && className && (
           <div className="mb-1 flex min-w-0 items-center gap-1.5">
             <ColorDot colorId={accentColor} size={7} />
@@ -296,7 +297,7 @@ export function AssignmentCard({
             {error}
           </p>
         )}
-      </div>
+      </Link>
 
       {!readOnly && (
         <>

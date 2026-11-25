@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import Link from "next/link";
 import { isNextRedirectError } from "@/lib/errors";
 import { createClass } from "@/lib/actions/classes";
 import { ACCENT_COLORS } from "@/lib/colors";
+import { useRouter } from "next/navigation";
 
 export default function NewClassPage() {
   const [name, setName] = useState("");
@@ -13,6 +13,22 @@ export default function NewClassPage() {
   const [color, setColor] = useState<string>(ACCENT_COLORS[0].id);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+
+  const router = useRouter();
+
+  function dismiss() {
+    if (pending) return;
+
+    // Return to the previous in-app page when possible.
+    if (
+      window.history.length > 1 &&
+      document.referrer.startsWith(window.location.origin)
+    ) {
+      router.back();
+    } else {
+      router.replace("/classes");
+    }
+  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -29,10 +45,26 @@ export default function NewClassPage() {
   }
 
   return (
-    <main className="min-h-screen px-6 py-10 max-w-md mx-auto">
-      <Link href="/classes" className="text-sm text-muted">
-        ← Back
-      </Link>
+    <div
+      className="fixed inset-0 z-[120] flex items-end justify-center overflow-y-auto bg-ink/35 px-0 pt-[env(safe-area-inset-top)] sm:items-center sm:px-4 sm:py-6"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) dismiss();
+      }}
+    >
+      <main
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="new-class-title"
+        className="modal-panel-enter my-auto max-h-[calc(100dvh_-_env(safe-area-inset-top)_-_env(safe-area-inset-bottom))] w-full max-w-md overflow-y-auto overscroll-contain rounded-t-2xl border border-hairline bg-paper px-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] pt-6 shadow-xl sm:rounded-2xl sm:p-8"
+      >
+        <button
+          type="button"
+          onClick={dismiss}
+          disabled={pending}
+          className="mb-3 inline-flex min-h-11 items-center text-sm text-muted underline underline-offset-2"
+        >
+          ← Back
+        </button>
       <h1 className="font-serif text-3xl mt-4 mb-8">Create a class</h1>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -89,6 +121,7 @@ export default function NewClassPage() {
           {pending ? "Creating…" : "Create class"}
         </button>
       </form>
-    </main>
+      </main>
+    </div>
   );
 }

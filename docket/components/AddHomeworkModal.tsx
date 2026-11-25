@@ -244,7 +244,6 @@ export function AddHomeworkModal({
         onSubmit={handleSubmit}
         className="modal-panel-enter max-h-[calc(100dvh_-_env(safe-area-inset-top)_-_env(safe-area-inset-bottom))] w-full overflow-y-auto overscroll-contain rounded-t-2xl border border-hairline bg-paper px-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] pt-6 shadow-xl sm:max-h-[min(90dvh,48rem)] sm:max-w-md sm:rounded-2xl sm:p-7"
       >
-        <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-hairline sm:hidden" />
         <h2 id="assignment-modal-title" className="mb-5 font-serif text-2xl">
           {existing ? "Edit homework" : "Add homework"}
         </h2>
