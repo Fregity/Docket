@@ -23,96 +23,160 @@
 }
 
 @layer base {
-  * {
+  *,
+  *::before,
+  *::after {
     @apply border-hairline;
   }
+
   html {
     @apply bg-paper;
+    min-height: 100%;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
   }
+
   body {
     @apply bg-paper text-ink antialiased;
+    min-height: 100dvh;
+    overflow-x: clip;
   }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+
   ::selection {
     background: rgb(var(--ink));
     color: rgb(var(--paper));
   }
+
   :focus-visible {
     outline: 2px solid rgb(var(--ink));
-    outline-offset: 2px;
+    outline-offset: 3px;
   }
+
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
     *::after {
-      animation-duration: 0.001ms !important;
-      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
     }
   }
 }
 
 @layer components {
   .btn {
-    @apply inline-flex items-center justify-center rounded-xl px-5 py-3 text-[15px] font-medium transition-all duration-150;
+    @apply inline-flex min-h-11 items-center justify-center rounded-xl px-5 py-3 text-[15px] font-medium;
+    transition:
+      background-color 150ms ease,
+      color 150ms ease,
+      border-color 150ms ease,
+      opacity 150ms ease,
+      transform 150ms ease,
+      box-shadow 150ms ease;
   }
+
+  .btn:active:not(:disabled) {
+    transform: scale(0.98);
+  }
+
   .btn-primary {
     @apply btn bg-ink text-paper hover:opacity-90;
   }
+
   .btn-secondary {
-    @apply btn bg-transparent text-ink border border-hairline hover:bg-wash;
+    @apply btn border border-hairline bg-transparent text-ink hover:bg-wash;
   }
+
   .btn-ghost {
     @apply btn bg-transparent text-muted hover:text-ink;
   }
+
   .card {
-    @apply rounded-xl border border-hairline bg-paper p-4;
+    @apply min-w-0 rounded-xl border border-hairline bg-paper p-4;
   }
+
   .input {
-    @apply w-full rounded-xl border border-hairline bg-paper px-4 py-3 text-[15px] placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-ink/20;
+    @apply min-h-11 w-full rounded-xl border border-hairline bg-paper px-4 py-3 text-[16px] text-ink placeholder:text-faint focus:outline-none focus:ring-2 focus:ring-ink/20;
   }
+
   .label {
-    @apply block text-sm text-muted mb-1.5;
+    @apply mb-1.5 block text-sm text-muted;
+  }
+
+  .page-container {
+    @apply mx-auto w-full max-w-2xl px-4 sm:px-6;
+  }
+
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 }
 
 /* Onboarding page transitions */
-
 @keyframes onboarding-enter {
   from {
     opacity: 0;
-    transform: translateY(12px) scale(0.99);
+    transform: translate3d(0, 12px, 0) scale(0.99);
   }
   to {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translate3d(0, 0, 0) scale(1);
   }
 }
 
 @keyframes onboarding-exit {
   from {
     opacity: 1;
-    transform: translateY(0) scale(1);
+    transform: translate3d(0, 0, 0) scale(1);
   }
   to {
     opacity: 0;
-    transform: translateY(-8px) scale(0.99);
+    transform: translate3d(0, -8px, 0) scale(0.99);
   }
 }
 
 @keyframes onboarding-progress {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+@keyframes modal-enter {
   from {
-    transform: scaleX(0);
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
   }
   to {
-    transform: scaleX(1);
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
   }
 }
 
 .onboarding-page {
-  animation: onboarding-enter 450ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation: onboarding-enter 350ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
 .onboarding-exiting .onboarding-page {
-  animation: onboarding-exit 180ms ease-in both;
+  animation: onboarding-exit 160ms ease-in both;
   pointer-events: none;
 }
 
@@ -121,18 +185,23 @@
   animation: onboarding-progress 700ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
+.modal-panel-enter {
+  animation: modal-enter 180ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
 ::view-transition-old(root) {
-  animation: onboarding-exit 180ms ease-in both;
+  animation: onboarding-exit 160ms ease-in both;
 }
 
 ::view-transition-new(root) {
-  animation: onboarding-enter 400ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation: onboarding-enter 300ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .onboarding-page,
   .onboarding-progress-fill,
   .onboarding-exiting .onboarding-page,
+  .modal-panel-enter,
   ::view-transition-old(root),
   ::view-transition-new(root) {
     animation: none !important;

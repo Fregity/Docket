@@ -1,8 +1,11 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { toggleAssignmentComplete, deleteAssignment } from "@/lib/actions/assignments";
+import {
+  toggleAssignmentComplete,
+  deleteAssignment,
+} from "@/lib/actions/assignments";
 import { relativeDueLabel } from "@/lib/dates";
 import { ColorDot } from "@/components/ui";
 import { AddHomeworkModal } from "@/components/AddHomeworkModal";
@@ -18,6 +21,8 @@ export type AssignmentData = {
   recurrence_interval_weeks?: number | null;
   recurrence_monthly?: boolean;
 };
+
+type MenuPosition = { top: number; left: number };
 
 export function AssignmentCard({
   assignment,
@@ -35,157 +40,280 @@ export function AssignmentCard({
   readOnly?: boolean;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [menuPos, setMenuPos] = useState<{ top: number; left: number } | null>(null);
-  const menuButtonRef = useRef<HTMLButtonElement>(null);
-  const [pending, startTransition] = useTransition();
+  const [menuPos, setMenuPos] = useState<MenuPosition | null>(null);
   const [completed, setCompleted] = useState(assignment.completed);
   const [editOpen, setEditOpen] = useState(false);
+  const [savingCompletion, setSavingCompletion] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [removed, setRemoved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+
+  function calculateMenuPosition(): MenuPosition | null {
+    const rect = menuButtonRef.current?.getBoundingClientRect();
+    if (!rect) return null;
+
+    const menuWidth = 176;
+    const menuHeight = 148;
+    const gap = 8;
+    const left = Math.max(
+      8,
+      Math.min(rect.right - menuWidth, window.innerWidth - menuWidth - 8)
+    );
+    const roomBelow = window.innerHeight - rect.bottom;
+    const top =
+      roomBelow >= menuHeight + gap
+        ? rect.bottom + gap
+        : Math.max(8, rect.top - menuHeight - gap);
+
+    return { top, left };
+  }
 
   function openMenu() {
-    const rect = menuButtonRef.current?.getBoundingClientRect();
-    if (rect) {
-      setMenuPos({ top: rect.bottom + 4, left: Math.max(8, rect.right - 160) });
-    }
+    setMenuPos(calculateMenuPosition());
     setMenuOpen(true);
   }
 
-  function handleToggle() {
-    const next = !completed;
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    const reposition = () => setMenuPos(calculateMenuPosition());
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
+
+    window.addEventListener("resize", reposition);
+    window.addEventListener("scroll", reposition, true);
+    window.addEventListener("keydown", closeOnEscape);
+
+    return () => {
+      window.removeEventListener("resize", reposition);
+      window.removeEventListener("scroll", reposition, true);
+      window.removeEventListener("keydown", closeOnEscape);
+    };
+  }, [menuOpen]);
+
+  async function handleToggle() {
+    if (savingCompletion || deleting) return;
+
+    const previous = completed;
+    const next = !previous;
     setCompleted(next);
-    startTransition(async () => {
-      try {
-        await toggleAssignmentComplete({
-          id: assignment.id,
-          classId: assignment.class_id,
-          completed: next,
-        });
-      } catch {
-        setCompleted(!next);
-      }
-    });
+    setSavingCompletion(true);
+    setError(null);
+
+    try {
+      await toggleAssignmentComplete({
+        id: assignment.id,
+        classId: assignment.class_id,
+        completed: next,
+      });
+    } catch (err) {
+      setCompleted(previous);
+      setError(
+        err instanceof Error ? err.message : "Couldn't update this assignment."
+      );
+    } finally {
+      setSavingCompletion(false);
+    }
   }
 
-  function handleDelete() {
+  async function handleDelete() {
+    if (deleting) return;
+
     setMenuOpen(false);
-    startTransition(() => {
-      deleteAssignment({ id: assignment.id, classId: assignment.class_id });
-    });
+    setDeleting(true);
+    setRemoved(true);
+    setError(null);
+
+    try {
+      await deleteAssignment({
+        id: assignment.id,
+        classId: assignment.class_id,
+      });
+    } catch (err) {
+      setRemoved(false);
+      setError(
+        err instanceof Error ? err.message : "Couldn't delete this assignment."
+      );
+    } finally {
+      setDeleting(false);
+    }
   }
 
-  const overdue = !completed && relativeDueLabel(assignment.due_date, completed).includes("overdue");
+  const overdue =
+    !completed &&
+    relativeDueLabel(assignment.due_date, completed).includes("overdue");
 
-  const menuContent = menuOpen && menuPos && (
-    <>
-      <div className="fixed inset-0 z-[90]" onClick={() => setMenuOpen(false)} />
-      <div
-        style={{ position: "fixed", top: menuPos.top, left: menuPos.left }}
-        className="w-40 rounded-xl border border-hairline bg-paper shadow-sm z-[91] overflow-hidden"
-      >
+  if (removed) return null;
+
+  const menuContent =
+    menuOpen && menuPos ? (
+      <>
         <button
-          className="w-full text-left px-4 py-2.5 text-sm hover:bg-wash"
-          onClick={() => {
-            setMenuOpen(false);
-            setEditOpen(true);
-          }}
+          type="button"
+          aria-label="Close assignment menu"
+          className="fixed inset-0 z-[90] cursor-default"
+          onClick={() => setMenuOpen(false)}
+        />
+        <div
+          role="menu"
+          aria-label="Assignment options"
+          style={{ position: "fixed", top: menuPos.top, left: menuPos.left }}
+          className="z-[91] w-44 overflow-hidden rounded-xl border border-hairline bg-paper shadow-lg"
         >
-          Edit
-        </button>
-        <button
-          className="w-full text-left px-4 py-2.5 text-sm hover:bg-wash"
-          onClick={() => {
-            setMenuOpen(false);
-            handleToggle();
-          }}
-        >
-          {completed ? "Mark incomplete" : "Mark complete"}
-        </button>
-        <button
-          className="w-full text-left px-4 py-2.5 text-sm hover:bg-wash text-danger"
-          onClick={handleDelete}
-        >
-          Delete
-        </button>
-      </div>
-    </>
-  );
+          <button
+            type="button"
+            role="menuitem"
+            className="min-h-11 w-full px-4 py-2.5 text-left text-sm hover:bg-wash"
+            onClick={() => {
+              setMenuOpen(false);
+              setEditOpen(true);
+            }}
+          >
+            Edit
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            className="min-h-11 w-full px-4 py-2.5 text-left text-sm hover:bg-wash"
+            onClick={() => {
+              setMenuOpen(false);
+              void handleToggle();
+            }}
+          >
+            {completed ? "Mark incomplete" : "Mark complete"}
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            className="min-h-11 w-full px-4 py-2.5 text-left text-sm text-danger hover:bg-wash"
+            onClick={() => void handleDelete()}
+          >
+            Delete
+          </button>
+        </div>
+      </>
+    ) : null;
 
   return (
-    <div className="card flex items-start gap-3 animate-fade-in">
+    <article
+      className={`card flex min-w-0 items-start gap-3 transition-[opacity,transform] duration-150 ${
+        deleting ? "pointer-events-none opacity-50" : "opacity-100"
+      }`}
+    >
       {readOnly ? (
         <span
-          className={`mt-0.5 w-5 h-5 shrink-0 rounded-full border-2 ${
-            completed ? "bg-ink border-ink" : "border-faint"
+          aria-hidden="true"
+          className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 ${
+            completed ? "border-ink bg-ink" : "border-faint"
           }`}
         />
       ) : (
         <button
-          onClick={handleToggle}
-          disabled={pending}
+          type="button"
+          onClick={() => void handleToggle()}
+          disabled={savingCompletion || deleting}
           aria-label={completed ? "Mark incomplete" : "Mark complete"}
-          className={`mt-0.5 w-5 h-5 shrink-0 rounded-full border-2 flex items-center justify-center transition-colors ${
-            completed ? "bg-ink border-ink" : "border-faint hover:border-ink"
+          aria-pressed={completed}
+          className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 transition-colors disabled:opacity-60 ${
+            completed
+              ? "border-ink bg-ink"
+              : "border-faint hover:border-ink"
           }`}
         >
           {completed && (
-            <svg viewBox="0 0 16 16" className="w-3 h-3 text-paper animate-check-pop" fill="none">
-              <path d="M3 8l3.5 3.5L13 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <svg
+              viewBox="0 0 16 16"
+              className="h-3 w-3 text-paper"
+              fill="none"
+              aria-hidden="true"
+            >
+              <path
+                d="M3 8l3.5 3.5L13 5"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
           )}
         </button>
       )}
 
-      <div className="flex-1 min-w-0">
+      <div className="min-w-0 flex-1">
         {showClassName && className && (
-          <div className="flex items-center gap-1.5 mb-1">
+          <div className="mb-1 flex min-w-0 items-center gap-1.5">
             <ColorDot colorId={accentColor} size={7} />
-            <span className="text-xs text-muted">{className}</span>
+            <span className="truncate text-xs text-muted">{className}</span>
           </div>
         )}
-        <p className={`text-[15px] leading-snug ${completed ? "text-faint line-through" : "text-ink"}`}>
+
+        <p
+          className={`break-words text-[15px] leading-snug ${
+            completed ? "text-faint line-through" : "text-ink"
+          }`}
+        >
           {assignment.title}
         </p>
+
         {assignment.description && (
-          <p className="text-sm text-muted mt-0.5">{assignment.description}</p>
+          <p className="mt-1 break-words text-sm text-muted">
+            {assignment.description}
+          </p>
         )}
-        <div className="flex items-center gap-2 mt-1.5">
-          <span className={`font-serif text-sm ${overdue ? "text-danger" : "text-muted"}`}>
+
+        <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+          <span
+            className={`font-serif text-sm ${
+              overdue ? "text-danger" : "text-muted"
+            }`}
+          >
             {relativeDueLabel(assignment.due_date, completed)}
           </span>
           {assignment.recurrence_monthly && (
-            <span className="text-xs text-faint" title="Repeats monthly">
-              ↻ Monthly
-            </span>
+            <span className="text-xs text-faint">↻ Monthly</span>
           )}
-          {!assignment.recurrence_monthly && assignment.recurrence_interval_weeks === 1 && (
-            <span className="text-xs text-faint" title="Repeats weekly">
-              ↻ Weekly
-            </span>
-          )}
+          {!assignment.recurrence_monthly &&
+            assignment.recurrence_interval_weeks === 1 && (
+              <span className="text-xs text-faint">↻ Weekly</span>
+            )}
           {!assignment.recurrence_monthly &&
             assignment.recurrence_interval_weeks != null &&
             assignment.recurrence_interval_weeks > 1 && (
-              <span className="text-xs text-faint" title={`Repeats every ${assignment.recurrence_interval_weeks} weeks`}>
+              <span className="text-xs text-faint">
                 ↻ Every {assignment.recurrence_interval_weeks} weeks
               </span>
             )}
-          <span className="text-faint text-xs">·</span>
-          <span className="text-xs text-faint">Added by {assignment.created_by_name}</span>
+          <span className="text-xs text-faint">·</span>
+          <span className="break-words text-xs text-faint">
+            Added by {assignment.created_by_name}
+          </span>
         </div>
+
+        {error && (
+          <p role="alert" className="mt-2 text-xs text-danger">
+            {error}
+          </p>
+        )}
       </div>
 
       {!readOnly && (
         <>
-          <div className="relative">
-            <button
-              ref={menuButtonRef}
-              onClick={() => (menuOpen ? setMenuOpen(false) : openMenu())}
-              className="text-faint hover:text-ink px-1 py-1 rounded"
-              aria-label="Assignment options"
-            >
-              •••
-            </button>
-            {typeof document !== "undefined" && createPortal(menuContent, document.body)}
-          </div>
+          <button
+            ref={menuButtonRef}
+            type="button"
+            onClick={() => (menuOpen ? setMenuOpen(false) : openMenu())}
+            disabled={deleting}
+            aria-label="Assignment options"
+            aria-haspopup="menu"
+            aria-expanded={menuOpen}
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-lg leading-none text-faint transition-colors hover:bg-wash hover:text-ink disabled:opacity-50"
+          >
+            •••
+          </button>
+          {typeof document !== "undefined" &&
+            createPortal(menuContent, document.body)}
 
           <AddHomeworkModal
             classes={editableClasses}
@@ -196,7 +324,8 @@ export function AssignmentCard({
               title: assignment.title,
               description: assignment.description,
               due_date: assignment.due_date,
-              recurrence_interval_weeks: assignment.recurrence_interval_weeks ?? null,
+              recurrence_interval_weeks:
+                assignment.recurrence_interval_weeks ?? null,
               recurrence_monthly: assignment.recurrence_monthly ?? false,
             }}
             open={editOpen}
@@ -204,6 +333,6 @@ export function AssignmentCard({
           />
         </>
       )}
-    </div>
+    </article>
   );
 }

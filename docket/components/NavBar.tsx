@@ -14,19 +14,25 @@ export function NavBar() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 bg-paper/95 backdrop-blur border-t border-hairline">
-      <div className="max-w-2xl mx-auto flex justify-around">
+    <nav
+      aria-label="Main navigation"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-hairline bg-paper/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md"
+    >
+      <div className="mx-auto flex min-h-16 w-full max-w-2xl">
         {ITEMS.map((item) => {
-          const active = pathname === item.href || pathname.startsWith(item.href + "/");
+          const active =
+            pathname === item.href || pathname.startsWith(item.href + "/");
+
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`flex-1 text-center py-3 text-sm transition-colors ${
-                active ? "text-ink font-medium" : "text-faint"
+              aria-current={active ? "page" : undefined}
+              className={`flex min-h-16 min-w-0 flex-1 items-center justify-center px-1 py-3 text-center text-xs transition-colors sm:text-sm ${
+                active ? "font-medium text-ink" : "text-faint hover:text-ink"
               }`}
             >
-              {item.label}
+              <span className="truncate">{item.label}</span>
             </Link>
           );
         })}
