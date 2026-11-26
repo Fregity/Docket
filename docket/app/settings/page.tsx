@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { signOut, updateDisplayName } from "@/lib/actions/account";
 import { NavBar } from "@/components/NavBar";
@@ -10,9 +11,11 @@ export const dynamic = "force-dynamic";
 
 export default async function SettingsPage() {
   const supabase = await createClient();
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
   if (!user) return null;
 
   const { data: profile } = await supabase
@@ -21,50 +24,104 @@ export default async function SettingsPage() {
     .eq("id", user.id)
     .single();
 
+  const adminEmails = (process.env.ADMIN_EMAILS ?? "")
+    .split(",")
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean);
+
+  const isAdmin =
+    !!user.email && adminEmails.includes(user.email.toLowerCase());
+
   async function saveName(formData: FormData) {
     "use server";
+
     const name = formData.get("name");
+
     if (typeof name === "string" && name.trim()) {
       await updateDisplayName(name);
     }
   }
 
   return (
-    <div className="min-h-screen pb-24">
-      <header className="px-6 pt-10 pb-4 max-w-md mx-auto">
-        <h1 className="font-serif text-3xl text-ink">Settings</h1>
+    <div className="min-h-screen bg-paper pb-28">
+      <header className="mx-auto max-w-md px-5 pb-5 pt-10">
+        <h1 className="text-3xl font-bold tracking-tight text-ink">
+          Settings
+        </h1>
+        <p className="mt-1 text-sm text-muted">
+          Manage your account and preferences.
+        </p>
       </header>
 
-      <main className="px-6 max-w-md mx-auto flex flex-col gap-8">
-        <form action={saveName} className="flex flex-col gap-1.5">
-          <label className="label">Display name</label>
-          <input
-            className="input"
-            name="name"
-            defaultValue={profile?.display_name ?? ""}
-            required
-          />
-          <button type="submit" className="btn-secondary mt-2 self-start">
-            Save
-          </button>
-        </form>
+      <main className="mx-auto flex max-w-md flex-col gap-4 px-5">
+        <section className="rounded-2xl border border-hairline bg-paper p-5">
+          <h2 className="mb-4 text-sm font-semibold text-ink">
+            Account
+          </h2>
 
-        <div>
-          <label className="label">Email</label>
-          <p className="text-[15px] text-ink">{user.email}</p>
-        </div>
+          <form action={saveName} className="flex flex-col">
+            <label className="label" htmlFor="display-name">
+              Display name
+            </label>
+            <input
+              id="display-name"
+              className="input"
+              name="name"
+              defaultValue={profile?.display_name ?? ""}
+              required
+            />
+            <button type="submit" className="btn-secondary mt-3 self-start">
+              Save name
+            </button>
+          </form>
 
-        <ThemeToggle />
+          <div className="mt-5 border-t border-hairline pt-4">
+            <p className="label">Email address</p>
+            <p className="break-all text-sm font-medium text-ink">
+              {user.email}
+            </p>
+          </div>
+        </section>
 
-        <PushNotificationSettings />
+        <section className="rounded-2xl border border-hairline bg-paper p-5">
+          <h2 className="mb-4 text-sm font-semibold text-ink">
+            Appearance
+          </h2>
+          <ThemeToggle />
+        </section>
+
+        <section className="rounded-2xl border border-hairline bg-paper p-5">
+          <PushNotificationSettings />
+        </section>
 
         <InstallButton />
 
-        <form action={signOut}>
-          <button type="submit" className="btn-ghost">
-            Sign out
-          </button>
-        </form>
+        {isAdmin && (
+          <section className="rounded-2xl border border-hairline bg-paper p-5">
+            <p className="text-sm font-semibold text-ink">
+              Administration
+            </p>
+            <p className="mt-1 text-sm text-muted">
+              Internal DueBird analytics and platform statistics.
+            </p>
+            <Link
+              href="/admin"
+              className="btn-secondary mt-4 flex w-full justify-between"
+            >
+              <span>View admin dashboard</span>
+              <span aria-hidden="true">→</span>
+            </Link>
+          </section>
+        )}
+
+        <section className="rounded-2xl border border-hairline bg-paper p-4">
+          <form action={signOut}>
+            <button type="submit" className="btn-ghost w-full justify-start">
+              Sign out
+            </button>
+          </form>
+        </section>
+
         <DeleteAccountButton />
       </main>
 
