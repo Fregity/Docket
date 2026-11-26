@@ -217,8 +217,8 @@
 
 
 
-/* DueBird editorial landing page */
-.landing-paper {
+/* Simplified DueBird landing page */
+.landing-page {
   --paper: 248 246 241;
   --ink: 20 20 19;
   --muted: 87 85 80;
@@ -228,29 +228,28 @@
   --danger: 217 56 30;
 
   color-scheme: light;
+  font-family: var(--font-geist-sans), Arial, sans-serif;
+  font-weight: 500;
   background: #f8f6f1;
   color: #141413;
 }
 
-.landing-paper ::selection {
+.landing-page h1 {
+  font-weight: 800;
+  letter-spacing: -0.055em;
+}
+
+.landing-page p {
+  text-wrap: pretty;
+}
+
+.landing-page ::selection {
   background: #141413;
   color: #f8f6f1;
 }
 
-.landing-paper a,
-.landing-paper button {
-  -webkit-tap-highlight-color: transparent;
-}
-
-.landing-paper input,
-.landing-paper select {
-  border-radius: 2px;
-}
-
-.landing-paper button:focus-visible,
-.landing-paper a:focus-visible,
-.landing-paper input:focus-visible,
-.landing-paper select:focus-visible {
+.landing-page a:focus-visible {
   outline: 2px solid #d9381e;
-  outline-offset: 3px;
+  outline-offset: 4px;
 }
+
