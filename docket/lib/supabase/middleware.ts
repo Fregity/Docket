@@ -8,6 +8,8 @@ const PUBLIC_PATHS = [
   "/join",
   "/demo",
   "/get-started",
+  "/privacy",
+  "/terms",
 ];
 
 function isPublicPath(pathname: string) {
