@@ -16,6 +16,9 @@ function LoginContent() {
   );
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [displayName, setDisplayName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(
@@ -38,6 +41,10 @@ function LoginContent() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (mode === "signup" && password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
     setLoading(true);
     setError(null);
     setNotice(null);
@@ -120,14 +127,25 @@ function LoginContent() {
 
           <div>
             <label className="label">Password</label>
-            <input
-              type="password"
-              className="input"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              minLength={6}
-              required
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                className="input pr-16"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                minLength={6}
+                autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted hover:text-ink"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            </div>
           </div>
 
           {error && <p className="text-sm" style={{ color: "#9C4A32" }}>{error}</p>}
