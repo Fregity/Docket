@@ -7,11 +7,11 @@ import LandingSampleCard from "@/components/LandingSampleCard";
 export const metadata: Metadata = {
   title: "DueBird | Shared Classwork Tracker",
   description:
-    "Create a class, invite classmates, and keep track of assignments and due dates together.",
+    "One shared assignment list for your class. Add work once, and everyone can see what's due.",
   alternates: { canonical: "/" },
   openGraph: {
     title: "DueBird | Shared Classwork Tracker",
-    description: "A shared assignment list for you and your classmates.",
+    description: "A shared assignment list for your class.",
     url: "https://myduebird.com",
     type: "website",
     images: ["/opengraph-image"],
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "DueBird | Shared Classwork Tracker",
-    description: "A shared assignment list for you and your classmates.",
+    description: "A shared assignment list for your class.",
     images: ["/opengraph-image"],
   },
 };
@@ -50,30 +50,22 @@ export default function LandingPage() {
 
       <header className="landing-header">
         <Link href="/" className="landing-wordmark" aria-label="DueBird home">
-          DueBird<span className="wordmark-period">.</span>
+          <img src="/icons/icon-192.png" alt="" />
+          <span>DueBird</span>
         </Link>
 
-        <div className="landing-header-right">
-          <span className="landing-header-note">A SHARED CLASS LIST</span>
-          <nav className="landing-nav" aria-label="Main navigation">
-            <Link href="/login" className="landing-login">
-              Log in
-            </Link>
-            <Link href="/get-started" className="landing-signup">
-              Sign up
-            </Link>
-          </nav>
-        </div>
+        <nav className="landing-nav" aria-label="Main navigation">
+          <Link href="/login" className="landing-login">
+            Log in
+          </Link>
+          <Link href="/get-started" className="landing-signup">
+            Sign up
+          </Link>
+        </nav>
       </header>
 
       <section className="landing-hero">
         <div className="landing-hero-copy">
-          <div className="landing-kicker">
-            <span className="landing-kicker-rule" />
-            CLASSWORK, TOGETHER
-            <span className="landing-kicker-rule" />
-          </div>
-
           <h1>
             Keep track
             <br />
@@ -82,7 +74,7 @@ export default function LandingPage() {
 
           <p className="landing-description">
             One shared assignment list for your class. Add work once, and
-            everyone can see what’s coming up.
+            everyone sees what’s due.
           </p>
 
           <div className="landing-actions">
@@ -95,29 +87,16 @@ export default function LandingPage() {
           </div>
 
           <p className="landing-footnote">
-            Less digging through chats. More knowing what’s next.
+            No more digging through the group chat.
           </p>
         </div>
 
-        <div className="landing-stamp" aria-hidden="true">
-          <span className="landing-stamp-top">THE CLASSROOM</span>
-          <span className="landing-stamp-main">DUE</span>
-          <span className="landing-stamp-bottom">IS IN ORDER</span>
-          <span className="landing-stamp-star">✳</span>
-        </div>
-      </section>
-
-      <section className="landing-example" aria-label="Example shared class list">
-        <div className="landing-example-heading">
-          <span>FROM THE CLASSROOM</span>
-          <span>AN EXAMPLE SHARED LIST</span>
-        </div>
         <LandingSampleCard />
       </section>
 
       <footer className="landing-footer">
         <p>
-          <strong>DueBird.</strong>
+          <strong>DueBird</strong>
           <span>Made for students, by students.</span>
         </p>
 
