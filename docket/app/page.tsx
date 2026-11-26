@@ -3,23 +3,25 @@ import Link from "next/link";
 import TrackPageView from "@/components/TrackPageView";
 
 export const metadata: Metadata = {
-  title: "DueBird — stop asking the group chat",
+  title: "Free Homework Planner for Students",
   description:
-    "A free homework planner built by a student. Classes, assignments, due dates — shared only with people who need them.",
-  alternates: { canonical: "/" },
+    "DueBird is a free homework planner that helps students organize classes, track assignments, and remember due dates in one place.",
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
-    title: "DueBird — stop asking the group chat",
+    title: "DueBird - Free Homework Planner for Students",
     description:
-      "Free homework planner for students. One place for classes, assignments, and due dates.",
+      "Organize classes, track homework assignments, and keep due dates in one place with DueBird.",
     url: "https://myduebird.com",
     type: "website",
     images: ["/opengraph-image"],
   },
   twitter: {
     card: "summary_large_image",
-    title: "DueBird — stop asking the group chat",
+    title: "DueBird - Free Homework Planner for Students",
     description:
-      "Free homework planner for students. One place for classes, assignments, and due dates.",
+      "Organize classes, track homework assignments, and keep due dates in one place with DueBird.",
     images: ["/opengraph-image"],
   },
 };
@@ -36,43 +38,11 @@ const structuredData = {
   isAccessibleForFree: true,
 };
 
-/** Your actual logo — blue bird, yellow beak */
-function Bird({ size = 64 }: { size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 512 512"
-      fill="none"
-      aria-hidden
-    >
-      <rect width="512" height="512" rx="112" fill="#1C1C1A" />
-      <g transform="translate(30,10)">
-        <path d="M 168,300 Q 70,300 15,352 Q 95,340 155,325 Z" fill="#3159C4" />
-        <path d="M 170,318 Q 78,330 30,378 Q 105,355 162,336 Z" fill="#2A4FB0" />
-        <ellipse cx="235" cy="278" rx="102" ry="84" transform="rotate(-8 235 278)" fill="#3B6FE0" />
-        <circle cx="308" cy="196" r="64" fill="#3B6FE0" />
-        <path d="M 362,190 Q 396,180 414,192 Q 396,202 362,204 Z" fill="#E0A72E" />
-        <ellipse cx="258" cy="278" rx="56" ry="70" fill="#C1652E" />
-        <ellipse cx="240" cy="335" rx="34" ry="27" fill="#F2ECDD" />
-        <path
-          d="M 270,222 C 232,232 198,252 182,282 C 174,297 172,312 178,325"
-          fill="none"
-          stroke="#2A4FB0"
-          strokeWidth="8"
-          strokeLinecap="round"
-        />
-        <circle cx="322" cy="182" r="7.5" fill="#1C1C1A" />
-      </g>
-      <rect x="95" y="415" width="322" height="14" rx="7" fill="#3A3530" />
-    </svg>
-  );
-}
-
 export default function LandingPage() {
   return (
-    <main className="db">
+    <main className="min-h-[100svh] flex flex-col onboarding-page">
       <TrackPageView eventName="landing_viewed" />
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -80,161 +50,109 @@ export default function LandingPage() {
         }}
       />
 
-      {/* ═══════════════ COVER ═══════════════ */}
-      <section className="cover">
-        <div className="cover-top">
-          <Bird size={44} />
-          <span className="cover-meta">free · student-built</span>
-        </div>
+      <header className="w-full max-w-6xl mx-auto px-6 pt-5 sm:pt-7 flex items-center justify-between">
+        <span className="font-serif text-xl text-ink">DueBird</span>
+        <span className="text-xs text-muted">Step 1 of 3</span>
+      </header>
 
-        <div className="cover-center">
-          <p className="cover-kicker">The group chat is not a planner.</p>
-          <h1 className="cover-title">
-            What did we
-            <br />
-            have for
-            <br />
-            <span className="hl">homework?</span>
-          </h1>
+      <div className="w-full max-w-6xl mx-auto px-6 mt-4">
+        <div className="h-1 rounded-full bg-wash overflow-hidden">
+          <div className="h-full w-1/3 rounded-full bg-ink onboarding-progress-fill" />
         </div>
+      </div>
 
-        <div className="cover-bottom">
-          <Link href="/get-started" className="cover-cta">
-            Start free →
-          </Link>
-          <Link href="/demo" className="cover-link">
-            or open the demo
-          </Link>
-        </div>
-      </section>
-
-      {/* ═══════════════ CHAOS → ORDER ═══════════════ */}
-      <section className="split">
-        <div className="split-left">
-          <span className="split-label">01 — before</span>
-          <h2>The group chat</h2>
-          <div className="chat">
-            <div className="chat-row">
-              <span className="who">maya</span>
-              <span>did we have the essay?</span>
-            </div>
-            <div className="chat-row">
-              <span className="who">jay</span>
-              <span>idk check canvas</span>
-            </div>
-            <div className="chat-row">
-              <span className="who">sam</span>
-              <span>wait was it friday or monday</span>
-            </div>
-            <div className="chat-row dim">
-              <span className="who">you</span>
-              <span>…</span>
-            </div>
-            <div className="chat-row">
-              <span className="who">maya</span>
-              <span>anyone??</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="split-right">
-          <span className="split-label">02 — after</span>
-          <h2>DueBird</h2>
-          <div className="board">
-            <div className="board-head">
-              <span>History · period 3</span>
-              <span className="tag">2 due</span>
-            </div>
-            <ul>
-              <li>
-                <i />
-                <div>
-                  <b>Essay — Industrial Revolution</b>
-                  <em>Due Mon · 2 pages</em>
-                </div>
-              </li>
-              <li>
-                <i />
-                <div>
-                  <b>Chapter 14 reading</b>
-                  <em>Due Wed</em>
-                </div>
-              </li>
-              <li className="done">
-                <i className="on" />
-                <div>
-                  <b>Primary source notes</b>
-                  <em>Done</em>
-                </div>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════ MANIFESTO ═══════════════ */}
-      <section className="manifesto">
-        <p>
-          Messages get buried.
-          <br />
-          Screenshots get lost.
-          <br />
-          Someone always misses the update.
+      <section className="flex-1 flex flex-col items-center justify-center px-6 py-7 sm:py-16 text-center">
+        <p className="text-[11px] sm:text-xs uppercase tracking-[0.2em] text-muted mb-5 sm:mb-7">
+          Made for students
         </p>
-        <p className="manifesto-end">
-          DueBird keeps every class separate,
-          <br />
-          every assignment visible,
-          <br />
-          and due dates where you can actually see them.
+
+        <h1 className="font-serif text-4xl sm:text-6xl md:text-7xl leading-[1.1] max-w-3xl text-ink">
+          What did we have for homework?
+        </h1>
+
+        <p className="font-serif italic text-xl sm:text-3xl mt-4 sm:mt-5 text-muted">
+          Stop asking the group chat.
+        </p>
+
+        <p className="text-sm sm:text-lg text-muted max-w-md mt-5 sm:mt-7 leading-relaxed">
+          Keep your classes, assignments, and due dates all in one place.
+        </p>
+
+        <Link
+          href="/demo"
+          className="btn-primary mt-8 sm:mt-10 px-10 py-4 text-base w-full max-w-xs"
+        >
+          See how it works
+          <span className="ml-2" aria-hidden="true">→</span>
+        </Link>
+
+        <p className="text-xs text-faint mt-3">
+          Takes less than a minute.
         </p>
       </section>
 
-      {/* ═══════════════ THREE RULES ═══════════════ */}
-      <section className="rules">
-        <article>
-          <span>01</span>
-          <h3>Classes stay separate</h3>
-          <p>Each course has its own space. No endless dump of everything at once.</p>
-        </article>
-        <article>
-          <span>02</span>
-          <h3>Assignments with context</h3>
-          <p>Title, due date, a short note. Enough to know what it is at 11pm.</p>
-        </article>
-        <article>
-          <span>03</span>
-          <h3>Share only when you want</h3>
-          <p>Invite with a code. Classmates see the same list. You control it.</p>
-        </article>
-      </section>
+      <section className="w-full bg-wash/50 border-y border-hairline px-6 py-16 sm:py-20">
+        <div className="max-w-5xl mx-auto">
+          <div className="max-w-2xl mx-auto text-center">
+            <p className="text-xs uppercase tracking-[0.18em] text-muted mb-3">
+              A simpler way to stay organized
+            </p>
+            <h2 className="font-serif text-3xl sm:text-4xl text-ink">
+              A homework planner built around how students actually work.
+            </h2>
+            <p className="mt-4 text-sm sm:text-base leading-relaxed text-muted">
+              DueBird is a free online homework planner for keeping track of
+              classes, assignments, and upcoming due dates. Instead of
+              searching through messages to remember what was assigned, keep
+              classwork organized in one shared place.
+            </p>
+          </div>
 
-      {/* ═══════════════ CLOSE ═══════════════ */}
-      <section className="end">
-        <Bird size={72} />
-        <h2>
-          One less thing
-          <br />
-          to stress about.
-        </h2>
-        <p>Free. No credit card. Built for real school weeks.</p>
-        <div className="end-actions">
-          <Link href="/get-started" className="cover-cta">
-            Get started
-          </Link>
-          <Link href="/demo" className="cover-link">
-            Explore demo
-          </Link>
+          <div className="grid gap-5 sm:grid-cols-3 mt-12">
+            <article className="rounded-2xl border border-hairline bg-paper p-6">
+              <h3 className="font-serif text-xl text-ink">Organize every class</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted">
+                Keep each course separate so assignments are easier to find
+                and your workload is easier to understand.
+              </p>
+            </article>
+            <article className="rounded-2xl border border-hairline bg-paper p-6">
+              <h3 className="font-serif text-xl text-ink">Track assignments</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted">
+                Add homework, descriptions, and due dates, then see upcoming
+                work together on your dashboard.
+              </p>
+            </article>
+            <article className="rounded-2xl border border-hairline bg-paper p-6">
+              <h3 className="font-serif text-xl text-ink">Share classwork</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted">
+                Create a class or join one with classmates so everyone can
+                keep up with the work assigned to the group.
+              </p>
+            </article>
+          </div>
+
+          <div className="max-w-2xl mx-auto text-center mt-14">
+            <h2 className="font-serif text-2xl sm:text-3xl text-ink">
+              Spend less time figuring out what’s due.
+            </h2>
+            <p className="mt-3 text-sm leading-relaxed text-muted">
+              Whether you call it a homework tracker, student planner, or
+              assignment organizer, DueBird gives your schoolwork one place
+              to live. It’s free to use and designed for students.
+            </p>
+            <Link
+              href="/demo"
+              className="btn-primary inline-flex justify-center mt-7 px-8 py-3"
+            >
+              Explore the demo
+            </Link>
+          </div>
         </div>
       </section>
 
-      <footer className="db-foot">
-        <span>Made for students, by a student.</span>
-        <span>
-          <Link href="/privacy">Privacy</Link>
-          {" · "}
-          <Link href="/terms">Terms</Link>
-        </span>
+      <footer className="text-center py-6 px-6 text-xs text-faint">
+        Made for students, by students.
       </footer>
     </main>
   );
