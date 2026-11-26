@@ -5,13 +5,6 @@ import { ThemeSync } from "@/components/ThemeSync";
 import { OnboardingTransitions } from "@/components/OnboardingTransitions";
 import "./globals.css";
 
-const editorial = Instrument_Serif({
-  subsets: ["latin"],
-  weight: "400",
-  variable: "--font-editorial",
-  display: "swap",
-});
-
 export const metadata: Metadata = {
   metadataBase: new URL("https://myduebird.com"),
   title: {
