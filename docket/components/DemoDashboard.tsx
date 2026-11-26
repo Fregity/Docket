@@ -1,61 +1,76 @@
-
 "use client";
 
 import { useRef, useState } from "react";
 import { trackEvent } from "@/lib/analytics";
-import { isoDateFromOffset, relativeDueLabel } from "@/lib/dates";
-import { ColorDot } from "@/components/ui";
 
-const demoClasses = [
-  { id: "biology", name: "Biology", accent_color: "green" },
-  { id: "algebra", name: "Algebra II", accent_color: "blue" },
-  { id: "history", name: "U.S. History", accent_color: "orange" },
+type Course = {
+  id: string;
+  code: string;
+  name: string;
+};
+
+type Assignment = {
+  id: string;
+  courseId: string;
+  title: string;
+  dueLabel: string;
+  addedBy: string;
+};
+
+const courses: Course[] = [
+  { id: "biology", code: "BIO-101", name: "Biology" },
+  { id: "math", code: "MATH-204", name: "Mathematics" },
+  { id: "history", code: "HIST-110", name: "U.S. History" },
 ];
 
-const demoAssignments = [
+const initialAssignments: Assignment[] = [
   {
-    id: "demo-1",
-    class_id: "biology",
-    title: "Cell structure worksheet",
-    due_date: isoDateFromOffset(1),
+    id: "sample-1",
+    courseId: "biology",
+    title: "Lab report: cell respiration",
+    dueLabel: "DUE TOMORROW",
+    addedBy: "Maya K.",
   },
   {
-    id: "demo-2",
-    class_id: "algebra",
-    title: "Complete problems 1–20",
-    due_date: isoDateFromOffset(0),
+    id: "sample-2",
+    courseId: "math",
+    title: "Problem set 06: limits and continuity",
+    dueLabel: "DUE TODAY",
+    addedBy: "Jordan R.",
+  },
+  {
+    id: "sample-3",
+    courseId: "history",
+    title: "Primary source response: Federalist No. 10",
+    dueLabel: "DUE MON, DEC 1",
+    addedBy: "Alex P.",
   },
 ];
 
 export function DemoDashboard() {
-  const [selectedClass, setSelectedClass] = useState<string | null>(null);
+  const [selectedCourse, setSelectedCourse] = useState("all");
+  const [assignments, setAssignments] =
+    useState<Assignment[]>(initialAssignments);
   const [completed, setCompleted] = useState<string[]>([]);
+  const [title, setTitle] = useState("");
+  const [courseId, setCourseId] = useState("biology");
+  const [dueDate, setDueDate] = useState("");
+  const [showAddForm, setShowAddForm] = useState(false);
   const started = useRef(false);
-  const trackedSelection = useRef(false);
 
-  const visibleAssignments = selectedClass
-    ? demoAssignments.filter((a) => a.class_id === selectedClass)
-    : demoAssignments;
+  const visibleAssignments =
+    selectedCourse === "all"
+      ? assignments
+      : assignments.filter((assignment) => assignment.courseId === selectedCourse);
 
-  function selectClass(id: string | null) {
-    if (id === selectedClass) return;
-
-    if (!started.current) {
-      started.current = true;
-      void trackEvent("demo_started");
-    }
-
-    setSelectedClass(id);
-
-    if (!trackedSelection.current) {
-      trackedSelection.current = true;
-      void trackEvent("demo_step_completed", {
-        step: "class_selection",
-      });
-    }
+  function trackDemoStart() {
+    if (started.current) return;
+    started.current = true;
+    void trackEvent("demo_started");
   }
 
-  function toggleAssignment(id: string) {
+  function toggleCompleted(id: string) {
+    trackDemoStart();
     setCompleted((current) =>
       current.includes(id)
         ? current.filter((item) => item !== id)
@@ -63,139 +78,236 @@ export function DemoDashboard() {
     );
   }
 
-  return (
-    <section className="w-full max-w-lg mx-auto px-5 py-5">
-      <div className="text-center mb-4">
-        <p className="text-xs uppercase tracking-widest text-muted mb-1">
-          Interactive preview
-        </p>
-        <h2 className="font-serif text-2xl text-ink">
-          See how DueBird works
-        </h2>
-      </div>
+  function addAssignment(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
 
-      <div className="max-w-md mx-auto">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="font-serif text-lg text-ink">
-            {selectedClass
-              ? demoClasses.find((c) => c.id === selectedClass)?.name
-              : "Upcoming"}
-          </h3>
-          {selectedClass && (
-            <button
-              onClick={() => selectClass(null)}
-              className="text-xs text-muted underline underline-offset-2"
-            >
-              Show all
-            </button>
-          )}
+    const cleanTitle = title.trim();
+    if (!cleanTitle) return;
+
+    trackDemoStart();
+
+    const dueLabel = dueDate
+      ? `DUE ${new Date(`${dueDate}T12:00:00`).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+        }).toUpperCase()}`
+      : "DATE NOT SET";
+
+    const newAssignment: Assignment = {
+      id: `visitor-${Date.now()}`,
+      courseId,
+      title: cleanTitle,
+      dueLabel,
+      addedBy: "You · preview only",
+    };
+
+    setAssignments((current) => [newAssignment, ...current]);
+    setSelectedCourse("all");
+    setTitle("");
+    setDueDate("");
+    setShowAddForm(false);
+  }
+
+  return (
+    <div className="border-b border-ink">
+      <div className="flex flex-col gap-4 border-b border-hairline py-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="font-mono text-[9px] tracking-[0.16em] text-muted">
+            SHARED CLASS BOARD
+          </p>
+          <p className="mt-1 font-serif text-2xl tracking-[-0.03em]">
+            Assignments
+          </p>
         </div>
 
-        <div className="flex flex-col gap-2">
-          {visibleAssignments.length > 0 ? (
-            visibleAssignments.map((assignment) => {
-              const classInfo = demoClasses.find(
-                (c) => c.id === assignment.class_id
-              )!;
-              const isCompleted = completed.includes(assignment.id);
+        <p className="font-mono text-[9px] tracking-[0.12em] text-muted">
+          SAMPLE DATA · 14 CLASSMATES
+        </p>
+      </div>
 
-              return (
-                <div
-                  key={assignment.id}
-                  className="card flex items-center gap-3"
-                >
+      <div className="flex flex-wrap gap-x-6 gap-y-3 border-b border-hairline py-4">
+        <button
+          type="button"
+          onClick={() => {
+            trackDemoStart();
+            setSelectedCourse("all");
+          }}
+          aria-pressed={selectedCourse === "all"}
+          className={`font-mono text-[9px] tracking-[0.12em] underline-offset-[7px] ${
+            selectedCourse === "all"
+              ? "text-ink underline decoration-2"
+              : "text-muted hover:text-ink"
+          }`}
+        >
+          ALL CLASSES
+        </button>
+
+        {courses.map((course) => (
+          <button
+            key={course.id}
+            type="button"
+            onClick={() => {
+              trackDemoStart();
+              setSelectedCourse(course.id);
+            }}
+            aria-pressed={selectedCourse === course.id}
+            className={`font-mono text-[9px] tracking-[0.12em] underline-offset-[7px] ${
+              selectedCourse === course.id
+                ? "text-ink underline decoration-2"
+                : "text-muted hover:text-ink"
+            }`}
+          >
+            {course.code}
+          </button>
+        ))}
+      </div>
+
+      <div className="min-h-[270px]">
+        {visibleAssignments.length > 0 ? (
+          visibleAssignments.map((assignment) => {
+            const course = courses.find(
+              (item) => item.id === assignment.courseId
+            );
+            const isCompleted = completed.includes(assignment.id);
+            const isUrgent =
+              assignment.dueLabel === "DUE TOMORROW" ||
+              assignment.dueLabel === "DUE TODAY";
+
+            return (
+              <article
+                key={assignment.id}
+                className="grid grid-cols-[minmax(0,1fr)_auto] gap-4 border-b border-hairline py-5 sm:grid-cols-[125px_minmax(0,1fr)_160px]"
+              >
+                <p className="font-mono text-[9px] tracking-[0.1em] text-muted">
+                  {course?.code}
+                </p>
+
+                <div className="min-w-0">
                   <button
                     type="button"
-                    onClick={() => toggleAssignment(assignment.id)}
-                    aria-label={
-                      isCompleted
-                        ? "Mark assignment incomplete"
-                        : "Mark assignment complete"
-                    }
+                    onClick={() => toggleCompleted(assignment.id)}
                     aria-pressed={isCompleted}
-                    className={`w-5 h-5 shrink-0 rounded-full border-2 flex items-center justify-center transition-colors ${
+                    className={`text-left font-serif text-xl leading-tight tracking-[-0.025em] decoration-1 underline-offset-4 hover:underline ${
                       isCompleted
-                        ? "bg-ink border-ink"
-                        : "border-faint hover:border-ink"
+                        ? "text-muted line-through"
+                        : "text-ink"
                     }`}
                   >
-                    {isCompleted && (
-                      <svg
-                        viewBox="0 0 16 16"
-                        className="w-3 h-3 text-paper"
-                        fill="none"
-                      >
-                        <path
-                          d="M3 8l3.5 3.5L13 5"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    )}
+                    {assignment.title}
                   </button>
 
-                  <div className="flex-1 min-w-0">
-                    <p
-                      className={`text-sm truncate ${
-                        isCompleted
-                          ? "text-faint line-through"
-                          : "text-ink"
-                      }`}
-                    >
-                      {assignment.title}
-                    </p>
-                    <div className="flex items-center gap-1.5 mt-1">
-                      <ColorDot colorId={classInfo.accent_color} size={7} />
-                      <span className="text-xs text-muted">
-                        {classInfo.name}
-                      </span>
-                    </div>
-                  </div>
-
-                  <span className="text-xs text-muted whitespace-nowrap">
-                    {relativeDueLabel(assignment.due_date, isCompleted)}
-                  </span>
+                  <p className="mt-2 font-mono text-[9px] tracking-[0.04em] text-muted">
+                    Added by {assignment.addedBy}
+                  </p>
                 </div>
-              );
-            })
-          ) : (
-            <p className="card text-sm text-muted text-center">
-              No sample assignments for this class.
-            </p>
-          )}
-        </div>
 
-        <div className="flex items-center justify-between mt-5 mb-2">
-          <h3 className="font-serif text-lg text-ink">My classes</h3>
-          <span className="text-xs text-muted">3 classes</span>
-        </div>
+                <div className="flex flex-col items-end gap-2">
+                  <span
+                    className={`font-mono text-[9px] tracking-[0.1em] ${
+                      isUrgent && !isCompleted
+                        ? "text-[#D9381E]"
+                        : "text-muted"
+                    }`}
+                  >
+                    {isCompleted ? "COMPLETED" : assignment.dueLabel}
+                  </span>
 
-        <div className="flex flex-col gap-2">
-          {demoClasses.map((c) => (
-            <button
-              key={c.id}
-              onClick={() =>
-                selectClass(selectedClass === c.id ? null : c.id)
-              }
-              className={`card w-full flex items-center gap-3 text-left py-3 transition-colors ${
-                selectedClass === c.id ? "border-ink" : "hover:border-faint"
-              }`}
-            >
-              <ColorDot colorId={c.accent_color} size={9} />
-              <span className="text-sm text-ink flex-1">{c.name}</span>
-              <span className="text-xs text-faint">
-                {selectedClass === c.id ? "✓" : "›"}
-              </span>
-            </button>
-          ))}
-        </div>
-
-        <p className="text-xs text-muted text-center mt-3">
-          Sample dashboard · Your classes are shared with classmates
-        </p>
+                  <button
+                    type="button"
+                    onClick={() => toggleCompleted(assignment.id)}
+                    className="font-mono text-[9px] tracking-wide text-muted underline decoration-hairline underline-offset-4 hover:text-ink"
+                  >
+                    {isCompleted ? "UNDO" : "MARK DONE"}
+                  </button>
+                </div>
+              </article>
+            );
+          })
+        ) : (
+          <p className="py-12 font-serif text-xl text-muted">
+            No assignments in this course yet.
+          </p>
+        )}
       </div>
-    </section>
+
+      <div className="border-t border-ink py-4">
+        {!showAddForm ? (
+          <button
+            type="button"
+            onClick={() => {
+              trackDemoStart();
+              setShowAddForm(true);
+            }}
+            className="font-mono text-[10px] tracking-wide text-ink underline decoration-hairline underline-offset-4 hover:decoration-ink"
+          >
+            + ADD AN ASSIGNMENT
+          </button>
+        ) : (
+          <form onSubmit={addAssignment} className="grid gap-3 sm:grid-cols-[1fr_150px_150px_auto]">
+            <label className="sr-only" htmlFor="demo-assignment-title">
+              Assignment title
+            </label>
+            <input
+              id="demo-assignment-title"
+              autoFocus
+              value={title}
+              onChange={(event) => setTitle(event.target.value)}
+              placeholder="Assignment title"
+              maxLength={120}
+              required
+              className="min-h-11 min-w-0 border border-hairline bg-transparent px-3 text-sm text-ink outline-none placeholder:text-muted focus:border-ink"
+            />
+
+            <label className="sr-only" htmlFor="demo-assignment-course">
+              Course
+            </label>
+            <select
+              id="demo-assignment-course"
+              value={courseId}
+              onChange={(event) => setCourseId(event.target.value)}
+              className="min-h-11 border border-hairline bg-transparent px-3 font-mono text-[10px] text-ink outline-none focus:border-ink"
+            >
+              {courses.map((course) => (
+                <option key={course.id} value={course.id}>
+                  {course.code}
+                </option>
+              ))}
+            </select>
+
+            <label className="sr-only" htmlFor="demo-assignment-date">
+              Due date
+            </label>
+            <input
+              id="demo-assignment-date"
+              type="date"
+              value={dueDate}
+              onChange={(event) => setDueDate(event.target.value)}
+              className="min-h-11 min-w-0 border border-hairline bg-transparent px-3 font-mono text-[10px] text-ink outline-none focus:border-ink"
+            />
+
+            <div className="flex gap-2">
+              <button
+                type="submit"
+                className="min-h-11 border border-ink bg-ink px-4 font-mono text-[9px] tracking-wide text-paper hover:bg-transparent hover:text-ink"
+              >
+                ADD
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowAddForm(false)}
+                className="min-h-11 px-2 font-mono text-[9px] text-muted underline underline-offset-4 hover:text-ink"
+              >
+                CANCEL
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+
+      <p className="border-t border-hairline py-3 font-mono text-[9px] leading-5 tracking-[0.04em] text-muted">
+        THIS IS AN INTERACTIVE PREVIEW. CHANGES ARE LOCAL TO THIS PAGE AND ARE
+        NOT SHARED WITH A REAL CLASS.
+      </p>
+    </div>
   );
 }
