@@ -10,6 +10,9 @@
   --hairline: 232 230 223;
   --wash: 250 250 247;
   --danger: 156 74 50;
+  --accent: 242 190 45;
+  --accent-ink: 90 60 0;
+  --accent-soft: 255 244 196;
 }
 
 .dark {
@@ -20,6 +23,9 @@
   --hairline: 51 51 48;
   --wash: 35 35 32;
   --danger: 224 132 106;
+  --accent: 232 180 50;
+  --accent-ink: 255 236 160;
+  --accent-soft: 55 45 15;
 }
 
 @layer base {
