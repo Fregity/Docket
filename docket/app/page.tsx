@@ -1,6 +1,8 @@
+
 import type { Metadata } from "next";
 import Link from "next/link";
 import TrackPageView from "@/components/TrackPageView";
+import LandingSampleCard from "@/components/LandingSampleCard";
 
 export const metadata: Metadata = {
   title: "DueBird | Shared Classwork Tracker",
@@ -48,24 +50,28 @@ export default function LandingPage() {
 
       <header className="landing-header">
         <Link href="/" className="landing-wordmark" aria-label="DueBird home">
-          DueBird<span>.</span>
+          DueBird<span className="wordmark-period">.</span>
         </Link>
 
-        <nav className="landing-nav" aria-label="Main navigation">
-          <Link href="/login" className="landing-login">
-            Log in
-          </Link>
-          <Link href="/get-started" className="landing-signup">
-            Sign up <span aria-hidden="true">↗</span>
-          </Link>
-        </nav>
+        <div className="landing-header-right">
+          <span className="landing-header-note">A SHARED CLASS LIST</span>
+          <nav className="landing-nav" aria-label="Main navigation">
+            <Link href="/login" className="landing-login">
+              Log in
+            </Link>
+            <Link href="/get-started" className="landing-signup">
+              Sign up
+            </Link>
+          </nav>
+        </div>
       </header>
 
       <section className="landing-hero">
         <div className="landing-hero-copy">
           <div className="landing-kicker">
-            <span className="landing-kicker-line" />
+            <span className="landing-kicker-rule" />
             CLASSWORK, TOGETHER
+            <span className="landing-kicker-rule" />
           </div>
 
           <h1>
@@ -81,9 +87,8 @@ export default function LandingPage() {
 
           <div className="landing-actions">
             <Link href="/get-started" className="landing-primary">
-              Create a class <span aria-hidden="true">↗</span>
+              Create a class
             </Link>
-
             <Link href="/join" className="landing-secondary">
               Join a class
             </Link>
@@ -94,14 +99,20 @@ export default function LandingPage() {
           </p>
         </div>
 
-        <div className="landing-art" aria-hidden="true">
-          <span className="landing-art-small">THE CLASS LIST</span>
-          <span className="landing-art-word">DUE</span>
-          <span className="landing-art-line landing-art-line-one" />
-          <span className="landing-art-line landing-art-line-two" />
-          <span className="landing-art-line landing-art-line-three" />
-          <span className="landing-art-caption">ALL IN ONE PLACE.</span>
+        <div className="landing-stamp" aria-hidden="true">
+          <span className="landing-stamp-top">THE CLASSROOM</span>
+          <span className="landing-stamp-main">DUE</span>
+          <span className="landing-stamp-bottom">IS IN ORDER</span>
+          <span className="landing-stamp-star">✳</span>
         </div>
+      </section>
+
+      <section className="landing-example" aria-label="Example shared class list">
+        <div className="landing-example-heading">
+          <span>FROM THE CLASSROOM</span>
+          <span>AN EXAMPLE SHARED LIST</span>
+        </div>
+        <LandingSampleCard />
       </section>
 
       <footer className="landing-footer">
