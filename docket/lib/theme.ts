@@ -5,7 +5,8 @@ const STORAGE_KEY = "duebird-theme";
 export function getStoredThemeChoice(): ThemeChoice {
   if (typeof window === "undefined") return "system";
   const stored = localStorage.getItem(STORAGE_KEY);
-  return stored === "light" || stored === "dark" ? stored : "system";
+  if (stored === "light" || stored === "dark") return stored;
+  return "dark";
 }
 
 export function setStoredThemeChoice(choice: ThemeChoice) {
