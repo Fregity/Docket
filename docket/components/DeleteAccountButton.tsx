@@ -14,13 +14,13 @@ export function DeleteAccountButton() {
     startTransition(async () => {
       try {
         const result = await deleteAccount();
-  
+
         if (result?.success) {
-            window.location.assign("/");
+          window.location.assign("/");
         }
       } catch (err) {
         setError(
-            err instanceof Error
+          err instanceof Error
             ? err.message
             : "Something went wrong. Please try again."
         );
@@ -29,20 +29,23 @@ export function DeleteAccountButton() {
   }
 
   return (
-    <section className="border-t border-border pt-6">
-      <h2 className="font-serif text-xl text-ink">Delete account</h2>
+    <section className="rounded-2xl border border-hairline bg-paper p-5">
+      <h2 className="text-sm font-semibold text-red-600">
+        Delete account
+      </h2>
 
-      <p className="text-sm text-muted mt-2">
+      <p className="mt-2 text-sm leading-relaxed text-muted">
         Permanently delete your DueBird account, profile, class memberships,
         and personal completion records. Shared classes and assignments
         remain available to other members. This cannot be undone.
       </p>
 
-      <label className="label block mt-4">
+      <label className="label mt-5" htmlFor="delete-confirmation">
         Type DELETE to confirm
       </label>
 
       <input
+        id="delete-confirmation"
         className="input"
         value={confirmation}
         onChange={(e) => setConfirmation(e.target.value)}
@@ -51,7 +54,7 @@ export function DeleteAccountButton() {
       />
 
       {error && (
-        <p className="text-sm text-red-600 mt-2" role="alert">
+        <p className="mt-2 text-sm text-red-600" role="alert">
           {error}
         </p>
       )}
@@ -60,7 +63,7 @@ export function DeleteAccountButton() {
         type="button"
         onClick={handleDelete}
         disabled={confirmation !== "DELETE" || pending}
-        className="mt-3 text-sm text-red-600 underline underline-offset-4 disabled:opacity-40"
+        className="mt-3 text-sm font-medium text-red-600 underline underline-offset-4 disabled:opacity-40"
       >
         {pending ? "Deleting account..." : "Permanently delete my account"}
       </button>
