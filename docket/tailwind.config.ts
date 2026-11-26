@@ -16,7 +16,8 @@ const config: Config = {
       },
       fontFamily: {
         sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
-        serif: ["var(--font-serif)", "Georgia", "serif"],
+        serif: ["var(--font-editorial)", "Georgia", "serif"],
+        mono: ["var(--font-geist-mono)", "ui-monospace", "monospace"],
       },
       borderRadius: {
         xl: "14px",
