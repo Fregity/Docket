@@ -148,6 +148,30 @@ function LoginContent() {
             </div>
           </div>
 
+          {mode === "signup" && (
+            <div>
+              <label className="label">Confirm password</label>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  className="input pr-16"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  autoComplete="new-password"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted hover:text-ink"
+                  aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                >
+                  {showConfirmPassword ? "Hide" : "Show"}
+                </button>
+              </div>
+            </div>
+          )}
+
           {error && <p className="text-sm" style={{ color: "#9C4A32" }}>{error}</p>}
           {notice && <p className="text-sm text-muted">{notice}</p>}
 
@@ -181,6 +205,9 @@ function LoginContent() {
               setMode(mode === "signin" ? "signup" : "signin");
               setError(null);
               setNotice(null);
+              setConfirmPassword("");
+              setShowPassword(false);
+              setShowConfirmPassword(false);
             }}
           >
             {mode === "signin" ? "Sign up" : "Sign in"}
