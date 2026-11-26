@@ -489,7 +489,10 @@
   border-radius: 5px;
   padding: 29px 30px;
   background: var(--lp-card);
-  box-shadow: 4px 4px 0 #101114;
+  transform: rotate(-1.5deg);
+  box-shadow:
+    12px 14px 0 #050608,
+    0 20px 40px rgba(0, 0, 0, 0.28);
 }
 
 .sample-card h2 {
@@ -520,6 +523,36 @@
   color: var(--lp-muted);
   font-size: 14px;
   font-weight: 500;
+}
+
+.sample-check {
+  display: flex;
+  width: 19px;
+  height: 19px;
+  flex: 0 0 19px;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid var(--lp-blue);
+  border-radius: 50%;
+  background: transparent;
+  color: white;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 800;
+  transition: background 120ms ease;
+}
+
+.sample-check:hover {
+  background: rgba(120, 150, 204, 0.2);
+}
+
+.sample-check.is-checked {
+  background: var(--lp-blue-strong);
+}
+
+.sample-card .is-checked-text {
+  color: #858B96;
+  text-decoration: line-through;
 }
 
 .sample-card li::before {

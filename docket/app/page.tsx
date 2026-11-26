@@ -103,7 +103,7 @@ export default function LandingPage() {
 
           <div className="landing-actions">
             <Link href="/get-started" className="landing-primary">
-              Create a class
+              Create your free account
             </Link>
             <Link href="/join" className="landing-secondary">
               Join a class
