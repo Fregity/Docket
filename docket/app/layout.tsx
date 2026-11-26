@@ -1,17 +1,9 @@
+
 import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
-import { Fraunces } from "next/font/google";
 import { ThemeSync } from "@/components/ThemeSync";
 import { OnboardingTransitions } from "@/components/OnboardingTransitions";
 import "./globals.css";
-
-const serif = Fraunces({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  style: ["normal", "italic"],
-  variable: "--font-serif",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://myduebird.com"),
@@ -64,10 +56,6 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-// Runs before hydration so the correct theme class is on <html> before the
-// very first paint — avoids a flash of the wrong theme on load. Reads the
-// user's saved preference (set via the toggle in Settings); falls back to
-// the OS-level preference if they've never chosen one
 const THEME_INIT_SCRIPT = `
 (function () {
   try {
@@ -84,7 +72,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${GeistSans.variable} ${serif.variable}`} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={GeistSans.variable}
+      suppressHydrationWarning
+    >
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
