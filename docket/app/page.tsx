@@ -1,8 +1,24 @@
 
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
+import { Newsreader, Plus_Jakarta_Sans } from "next/font/google";
 import TrackPageView from "@/components/TrackPageView";
 import LandingSampleCard from "@/components/LandingSampleCard";
+
+const displayFont = Newsreader({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-landing-display",
+  display: "swap",
+});
+
+const bodyFont = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-landing-body",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "DueBird | Shared Classwork Tracker",
@@ -38,7 +54,9 @@ const structuredData = {
 
 export default function LandingPage() {
   return (
-    <main className="landing-page">
+    <main
+      className={`${displayFont.variable} ${bodyFont.variable} landing-page`}
+    >
       <TrackPageView eventName="landing_viewed" />
 
       <script
@@ -50,7 +68,13 @@ export default function LandingPage() {
 
       <header className="landing-header">
         <Link href="/" className="landing-wordmark" aria-label="DueBird home">
-          <img src="/icons/icon-192.png" alt="" />
+          <Image
+            src="/icons/icon-192.png"
+            alt=""
+            width={40}
+            height={40}
+            priority
+          />
           <span>DueBird</span>
         </Link>
 
@@ -69,7 +93,7 @@ export default function LandingPage() {
           <h1>
             Keep track
             <br />
-            of <span className="landing-highlight">what’s due.</span>
+            of what’s due.
           </h1>
 
           <p className="landing-description">
