@@ -68,7 +68,7 @@ const THEME_INIT_SCRIPT = `
 (function () {
   try {
     var stored = localStorage.getItem('duebird-theme');
-    var isDark = stored === 'dark' || (stored !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    var isDark = stored === 'dark' || (stored !== 'light' && (stored === 'system' ? window.matchMedia('(prefers-color-scheme: dark)').matches : true));
     if (isDark) document.documentElement.classList.add('dark');
   } catch (e) {}
 })();
