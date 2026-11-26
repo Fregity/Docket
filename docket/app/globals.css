@@ -207,3 +207,130 @@
     animation: none !important;
   }
 }
+
+
+
+/* ============================================================
+   DueBird landing — unique, non-AI aesthetic
+   Drop these rules into globals.css (or import this file).
+   Requires the color tokens already in :root / .dark
+   ============================================================ */
+
+:root {
+  /* Accent: highlighter / bird yellow — the thing that makes it not another gray SaaS */
+  --accent: 242 190 45;           /* warm highlighter */
+  --accent-ink: 90 60 0;          /* dark text on accent */
+  --accent-soft: 255 244 196;     /* soft wash behind pills */
+}
+
+.dark {
+  --accent: 232 180 50;
+  --accent-ink: 255 236 160;
+  --accent-soft: 55 45 15;
+}
+
+/* Utility classes used by the landing */
+.text-accent {
+  color: rgb(var(--accent));
+}
+.text-accent-ink {
+  color: rgb(var(--accent-ink));
+}
+.bg-accent {
+  background-color: rgb(var(--accent));
+}
+.bg-accent-soft {
+  background-color: rgb(var(--accent-soft));
+}
+.bg-accent\/35 {
+  background-color: rgb(var(--accent) / 0.35);
+}
+
+/* Root entrance — slightly less polished than the old onboarding animation */
+.landing-root {
+  animation: landing-in 420ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes landing-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Bird mark */
+.bird-mark {
+  display: inline-flex;
+  color: rgb(var(--ink));
+  line-height: 0;
+}
+
+/* Fake group-chat card */
+.chat-card {
+  background: rgb(var(--paper));
+  border: 1px solid rgb(var(--hairline));
+  border-radius: 16px;
+  box-shadow:
+    0 1px 0 rgb(var(--hairline)),
+    0 12px 32px -12px rgb(0 0 0 / 0.12);
+  overflow: hidden;
+}
+
+/* Clean DueBird card */
+.due-card {
+  background: rgb(var(--paper));
+  border: 1.5px solid rgb(var(--ink) / 0.12);
+  border-radius: 18px;
+  box-shadow:
+    0 1px 0 rgb(var(--hairline)),
+    0 18px 40px -16px rgb(0 0 0 / 0.14);
+  overflow: hidden;
+}
+
+/* Sticky note */
+.sticky-note {
+  background: rgb(var(--accent-soft));
+  border: 1px solid rgb(var(--accent) / 0.35);
+  border-radius: 4px 4px 6px 4px;
+  padding: 10px 12px;
+  box-shadow: 1px 2px 0 rgb(var(--accent) / 0.25);
+  max-width: 110px;
+  font-family: var(--font-serif), Georgia, serif;
+  font-style: italic;
+}
+
+/* Feature tiles — less "3 equal cards", more notebook sections */
+.feature-tile {
+  background: rgb(var(--paper));
+  border: 1px solid rgb(var(--hairline));
+  border-radius: 16px;
+  padding: 1.25rem 1.35rem 1.4rem;
+  transition: border-color 150ms ease, transform 150ms ease;
+}
+
+.feature-tile:hover {
+  border-color: rgb(var(--ink) / 0.22);
+}
+
+.feature-num {
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  color: rgb(var(--accent-ink));
+  background: rgb(var(--accent-soft));
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+}
+
+/* Keep reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .landing-root {
+    animation: none !important;
+  }
+}
+
