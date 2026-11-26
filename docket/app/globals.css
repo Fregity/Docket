@@ -213,3 +213,44 @@
     animation: none !important;
   }
 }
+
+
+
+
+/* DueBird editorial landing page */
+.landing-paper {
+  --paper: 248 246 241;
+  --ink: 20 20 19;
+  --muted: 87 85 80;
+  --faint: 130 126 117;
+  --hairline: 220 216 206;
+  --wash: 242 239 231;
+  --danger: 217 56 30;
+
+  color-scheme: light;
+  background: #f8f6f1;
+  color: #141413;
+}
+
+.landing-paper ::selection {
+  background: #141413;
+  color: #f8f6f1;
+}
+
+.landing-paper a,
+.landing-paper button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.landing-paper input,
+.landing-paper select {
+  border-radius: 2px;
+}
+
+.landing-paper button:focus-visible,
+.landing-paper a:focus-visible,
+.landing-paper input:focus-visible,
+.landing-paper select:focus-visible {
+  outline: 2px solid #d9381e;
+  outline-offset: 3px;
+}
