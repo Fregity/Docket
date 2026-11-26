@@ -46,6 +46,14 @@
     @apply bg-paper text-ink antialiased;
     min-height: 100dvh;
     overflow-x: clip;
+    font-family: var(--font-geist-sans), Arial, sans-serif;
+    font-weight: 450;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-geist-sans), Arial, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.035em;
   }
 
   button,
@@ -87,6 +95,58 @@
       transition-duration: 0.01ms !important;
     }
   }
+}
+
+ 
+/* Consistent typography across the app */
+.font-serif {
+  font-family: var(--font-geist-sans), Arial, sans-serif !important;
+  letter-spacing: -0.025em;
+}
+
+/* Legal pages */
+.legal-document {
+  color: rgb(var(--ink));
+  font-family: var(--font-geist-sans), Arial, sans-serif;
+  font-size: 15px;
+  font-weight: 450;
+  line-height: 1.75;
+}
+
+.legal-document h1 {
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  font-weight: 750;
+  line-height: 1.1;
+  letter-spacing: -0.045em;
+}
+
+.legal-document h2 {
+  margin: 2.25rem 0 0.65rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.legal-document h3 {
+  margin: 1.5rem 0 0.5rem;
+  font-weight: 700;
+}
+
+.legal-document p,
+.legal-document li {
+  color: rgb(var(--muted));
+}
+
+.legal-document p {
+  margin-bottom: 1rem;
+}
+
+.legal-document ul {
+  list-style: disc;
+  padding-left: 1.4rem;
+}
+
+.legal-document li {
+  margin: 0.35rem 0;
 }
 
 @layer components {
@@ -217,21 +277,12 @@
 
 
 
-/* Simplified DueBird landing page */
+/* Simplified landing page */
 .landing-page {
-  --paper: 248 246 241;
-  --ink: 20 20 19;
-  --muted: 87 85 80;
-  --faint: 130 126 117;
-  --hairline: 220 216 206;
-  --wash: 242 239 231;
-  --danger: 217 56 30;
-
-  color-scheme: light;
   font-family: var(--font-geist-sans), Arial, sans-serif;
   font-weight: 500;
-  background: #f8f6f1;
-  color: #141413;
+  background: rgb(var(--paper));
+  color: rgb(var(--ink));
 }
 
 .landing-page h1 {
@@ -244,12 +295,11 @@
 }
 
 .landing-page ::selection {
-  background: #141413;
-  color: #f8f6f1;
+  background: rgb(var(--ink));
+  color: rgb(var(--paper));
 }
 
 .landing-page a:focus-visible {
-  outline: 2px solid #d9381e;
+  outline: 2px solid rgb(var(--danger));
   outline-offset: 4px;
 }
-
