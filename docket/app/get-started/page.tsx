@@ -46,13 +46,6 @@ export default function GetStartedPage() {
             Sign in
           </Link>
         </p>
-
-        <Link
-          href="/demo"
-          className="inline-block text-sm text-muted mt-8 hover:text-ink"
-        >
-          Back to the demo
-        </Link>
       </div>
 
       <footer className="absolute bottom-6 text-xs text-faint">
