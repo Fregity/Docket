@@ -405,6 +405,10 @@
   font-weight: 600;
   line-height: 0.99;
   letter-spacing: -0.045em;
+  text-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.55),
+    0 5px 8px rgba(0, 0, 0, 0.35),
+    0 12px 24px rgba(0, 0, 0, 0.3);
 }
 
 .landing-description {
@@ -648,10 +652,6 @@
   .landing-hero h1 {
     font-size: clamp(3.7rem, 12.5vw, 6rem);
     line-height: 1;
-    text-shadow:
-    0 2px 0 rgba(0, 0, 0, 0.55),
-    0 5px 8px rgba(0, 0, 0, 0.35),
-    0 12px 24px rgba(0, 0, 0, 0.3);
   }
 
   .landing-description {
