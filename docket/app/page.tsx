@@ -120,8 +120,8 @@ export default function LandingPage() {
         </div>
 
         <div className={styles.actions}>
-          <Link href="/join" className={styles.secondary}>
-            Join a class
+          <Link href="/login" className={styles.secondary}>
+            Join another class
           </Link>
           <Link href="/get-started" className={styles.primary}>
             Create your free account
