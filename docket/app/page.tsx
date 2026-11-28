@@ -1,22 +1,22 @@
-
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { Newsreader, Plus_Jakarta_Sans } from "next/font/google";
+import type { CSSProperties } from "react";
+import { Dela_Gothic_One, Familjen_Grotesk } from "next/font/google";
 import TrackPageView from "@/components/TrackPageView";
-import LandingSampleCard from "@/components/LandingSampleCard";
-import LandingLiveFeed from "@/components/LandingLiveFeed";
+import LandingClothesline from "@/components/LandingClothesline";
+import styles from "./landing.module.css";
 
-const displayFont = Newsreader({
+const displayFont = Dela_Gothic_One({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: "400",
   variable: "--font-landing-display",
   display: "swap",
 });
 
-const bodyFont = Plus_Jakarta_Sans({
+const bodyFont = Familjen_Grotesk({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
+  weight: ["400", "500", "700"],
   variable: "--font-landing-body",
   display: "swap",
 });
@@ -53,10 +53,12 @@ const structuredData = {
   isAccessibleForFree: true,
 };
 
+const word = (k: number): CSSProperties => ({ ["--k" as string]: k });
+
 export default function LandingPage() {
   return (
     <main
-      className={`${displayFont.variable} ${bodyFont.variable} landing-page`}
+      className={`${displayFont.variable} ${bodyFont.variable} ${styles.page}`}
     >
       <TrackPageView eventName="landing_viewed" />
 
@@ -67,61 +69,67 @@ export default function LandingPage() {
         }}
       />
 
-      <header className="landing-header">
-        <Link href="/" className="landing-wordmark" aria-label="DueBird home">
+      <header className={styles.header}>
+        <Link href="/" className={styles.wordmark} aria-label="DueBird home">
           <Image
             src="/icons/icon-192.png"
             alt=""
-            width={40}
-            height={40}
+            width={46}
+            height={46}
+            className={styles.logo}
             priority
           />
           <span>DueBird</span>
         </Link>
 
-        <nav className="landing-nav" aria-label="Main navigation">
-          <Link href="/login" className="landing-login">
+        <nav className={styles.nav} aria-label="Main navigation">
+          <Link href="/login" className={styles.login}>
             Log in
           </Link>
-          <Link href="/get-started" className="landing-signup">
+          <Link href="/get-started" className={styles.signup}>
             Sign up
           </Link>
         </nav>
       </header>
 
-      <section className="landing-hero">
-        <div className="landing-hero-copy">
-          <h1>
-            Keep track
-            <br />
-            of what’s due.
-          </h1>
+      <section className={styles.hero}>
+        <h1 aria-label="Keep track of what’s due.">
+          <span className={styles.line} aria-hidden="true">
+            <span className={styles.word} style={word(0)}>Keep track</span>
+          </span>
+          <span className={styles.line} aria-hidden="true">
+            <span className={styles.word} style={word(1)}>of what’s</span>
+          </span>
+          <span className={styles.line} aria-hidden="true">
+            <span className={styles.word} style={word(2)}>due.</span>
+          </span>
+        </h1>
+      </section>
 
-          <p className="landing-description">
+      <LandingClothesline />
+
+      <section className={styles.cta}>
+        <div>
+          <p className={styles.description}>
             One shared assignment list for your class. Add work once, and
             everyone sees what’s due.
           </p>
-
-          <div className="landing-actions">
-            <Link href="/get-started" className="landing-primary">
-              Create your free account
-            </Link>
-            <Link href="/join" className="landing-secondary">
-              Join a class
-            </Link>
-          </div>
-
-          <p className="landing-footnote">
+          <p className={styles.footnote}>
             No more digging through the group chat.
           </p>
         </div>
 
-        <LandingSampleCard />
+        <div className={styles.actions}>
+          <Link href="/join" className={styles.secondary}>
+            Join a class
+          </Link>
+          <Link href="/get-started" className={styles.primary}>
+            Create your free account
+          </Link>
+        </div>
       </section>
 
-      <LandingLiveFeed />
-
-      <footer className="landing-footer">
+      <footer className={styles.footer}>
         <p>
           <strong>DueBird</strong>
           <span>Made for students, by students.</span>
