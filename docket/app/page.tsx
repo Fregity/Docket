@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Newsreader, Plus_Jakarta_Sans } from "next/font/google";
 import TrackPageView from "@/components/TrackPageView";
 import LandingSampleCard from "@/components/LandingSampleCard";
+import LandingLiveFeed from "@/components/LandingLiveFeed";
 
 const displayFont = Newsreader({
   subsets: ["latin"],
@@ -117,6 +118,8 @@ export default function LandingPage() {
 
         <LandingSampleCard />
       </section>
+
+      <LandingLiveFeed />
 
       <footer className="landing-footer">
         <p>
